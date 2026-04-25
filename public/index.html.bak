@@ -953,13 +953,12 @@ async function loadChatContacts(){
     openGroupChat(list.firstChild);
   } else {
     try{
-      const r=await fetch('/api/chat/users');
-      const users=await r.json();
+      let users;
+      if(CU.role==='manager'){const r=await fetch('/api/chat/users');users=await r.json();}
+      else{const r=await fetch('/api/chat/users');users=await r.json();}
       allContacts=users;
       renderContactList(users);
-    }catch(e){
-      list.innerHTML='<div style="padding:16px;text-align:center;font-size:11px;color:var(--text3)">Gagal memuat</div>';
-    }
+    }catch(e){list.innerHTML='<div style="padding:16px;text-align:center;font-size:11px;color:var(--text3)">Gagal memuat</div>';}
   }
 }
 

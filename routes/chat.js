@@ -27,6 +27,15 @@ r.get('/personal/:userId',requireLogin,(req,res)=>{
   ).slice(-100));
 });
 
+// Tampilkan SEMUA user (bukan hanya yang sudah pernah chat)
+r.get('/users',requireLogin,(req,res)=>{
+  const d=db.get();
+  const users=d.users
+    .filter(u=>u.id!==req.session.user.id)
+    .map(u=>({id:u.id,name:u.name,role:u.role,username:u.username}));
+  res.json(users);
+});
+
 r.get('/contacts',requireLogin,(req,res)=>{
   const d=db.get();if(!d.chats)return res.json([]);
   const me=req.session.user.id;
@@ -36,11 +45,6 @@ r.get('/contacts',requireLogin,(req,res)=>{
     if(c.to_user_id===me)ids.add(c.from_id);
   });
   res.json(d.users.filter(u=>u.id!==me&&ids.has(u.id)).map(u=>({id:u.id,name:u.name,role:u.role})));
-});
-
-r.get('/users',requireLogin,(req,res)=>{
-  const d=db.get();
-  res.json(d.users.filter(u=>u.id!==req.session.user.id).map(u=>({id:u.id,name:u.name,role:u.role})));
 });
 
 module.exports=r;
