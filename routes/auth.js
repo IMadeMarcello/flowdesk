@@ -87,3 +87,18 @@ r.get('/pending',requireRole('manager'),(req,res)=>{
 });
 
 module.exports=r;
+
+// Ubah nama sendiri
+const {requireLogin: _rl} = require('../middleware/auth');
+r.patch('/update-profile', _rl, (req, res) => {
+  const { name } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ error: 'Nama tidak boleh kosong' });
+  if (name.trim().length < 2) return res.status(400).json({ error: 'Nama minimal 2 karakter' });
+  const d = require('../database').db.get();
+  const idx = d.users.findIndex(u => u.id === req.session.user.id);
+  if (idx === -1) return res.status(404).json({ error: 'User tidak ditemukan' });
+  d.users[idx].name = name.trim();
+  require('../database').db.save(d);
+  req.session.user.name = name.trim();
+  res.json({ success: true, name: name.trim() });
+});

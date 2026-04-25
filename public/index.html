@@ -336,14 +336,15 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
 <div id="app-page">
   <div class="topbar">
     <div class="tb-brand"><div class="tb-dot"></div>FlowDesk</div>
-    <div class="tb-user">
+    <div class="tb-user" onclick="openM('m-profile')" title="Klik untuk edit profil" style="cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
       <div class="tb-av" id="tbav"></div>
       <span style="font-weight:500;font-size:12px" id="tbnm">-</span>
       <span class="rb" id="tbrb">-</span>
+      <span style="font-size:10px;color:var(--text3)">✏️</span>
     </div>
     <button class="tbtn" onclick="toggleTheme()">🌙</button>
-    <button class="tbtn2" onclick="openM('m-chpass')">🔑 Password</button>
-    <button class="tbtn2" onclick="doLogout()">Keluar →</button>
+    <button class="tbtn2" onclick="openM('m-chpass')" data-tip="Ganti password akun" title="Ganti password">🔑 Password</button>
+    <button class="tbtn2" onclick="doLogout()" data-tip="Keluar dari akun" title="Keluar">Keluar →</button>
   </div>
   <div class="app-body">
     <div class="sidebar">
@@ -565,6 +566,40 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
   </div>
 </div>
 
+<!-- MODAL: PROFIL -->
+<div class="ovl" id="m-profile">
+  <div class="modal">
+    <div class="mtl">👤 Edit Profil</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 0;margin-bottom:16px;border-bottom:1px solid var(--border)">
+      <div id="prof-av" style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700"></div>
+      <div style="text-align:center">
+        <div id="prof-name" style="font-family:Syne,sans-serif;font-size:16px;font-weight:700;color:var(--text)">-</div>
+        <div id="prof-role" style="font-size:11px;color:var(--text3);margin-top:3px">-</div>
+        <div id="prof-username" style="font-size:11px;color:var(--text3);margin-top:2px">-</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Nama Lengkap Baru</label>
+      <input type="text" id="prof-name-inp" placeholder="Masukkan nama baru...">
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">Nama akan diperbarui di seluruh sistem</div>
+    </div>
+    <div class="msgbox err" id="prof-err"></div>
+    <div class="msgbox ok" id="prof-ok"></div>
+    <div class="mft">
+      <button class="bcanc" onclick="closeM('m-profile')">Tutup</button>
+      <button class="bsave" onclick="updateProfile()">
+        <span>Simpan Nama</span>
+        <span class="spn" id="sp-prof" style="display:none"></span>
+      </button>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <button class="bcanc" style="width:100%;text-align:center" onclick="closeM('m-profile');openM('m-chpass')">
+        🔑 Ganti Password
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: GANTI PASSWORD -->
 <div class="ovl" id="m-chpass">
   <div class="modal">
@@ -649,6 +684,7 @@ function showApp(){
   if(CU.role==='manager')document.querySelectorAll('.mo').forEach(el=>el.style.display='');
   document.getElementById('ddate').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('dgreet').textContent=greet(CU.name);
+  updateProfileModal();
   loadAll();
   startChatPoll();
 }
@@ -1306,6 +1342,110 @@ async function postComment(taskId){
     toast('Komentar terkirim','success');
   }catch(e){toast('Gagal kirim komentar','error');}
 }
+
+// ── PROFIL ────────────────────────────────────────────────────────────────
+function updateProfileModal(){
+  if(!CU)return;
+  const ci=AVC[CU.role==='manager'?0:CU.role==='teamlead'?1:2];
+  const av=document.getElementById('prof-av');
+  if(av){
+    av.style.background=ci[0];av.style.color=ci[1];
+    av.textContent=CU.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+  }
+  const ni=document.getElementById('prof-name-inp');
+  if(ni)ni.value=CU.name;
+  const pn=document.getElementById('prof-name');
+  if(pn)pn.textContent=CU.name;
+  const pr=document.getElementById('prof-role');
+  if(pr)pr.textContent=RL[CU.role]||CU.role;
+  const pu=document.getElementById('prof-username');
+  if(pu)pu.textContent='@'+CU.username;
+}
+
+async function updateProfile(){
+  const err=document.getElementById('prof-err');
+  const ok=document.getElementById('prof-ok');
+  err.style.display='none';ok.style.display='none';
+  const name=document.getElementById('prof-name-inp').value.trim();
+  if(!name){err.style.display='block';err.textContent='Nama tidak boleh kosong';return;}
+  if(name.length<2){err.style.display='block';err.textContent='Nama minimal 2 karakter';return;}
+  setSp('sp-prof',true);
+  try{
+    const r=await fetch('/api/auth/update-profile',{method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error);
+    CU.name=name;
+    // Update semua tampilan nama
+    document.getElementById('tbnm').textContent=name;
+    document.getElementById('dgreet').textContent=greet(name);
+    const av=document.getElementById('tbav');
+    av.textContent=name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    updateProfileModal();
+    ok.style.display='block';ok.textContent='✅ Nama berhasil diubah!';
+    toast('Nama berhasil diubah!','success');
+    setTimeout(()=>{ok.style.display='none';},3000);
+  }catch(e){err.style.display='block';err.textContent=e.message||'Gagal mengubah nama';}
+  finally{setSp('sp-prof',false);}
+}
+
+// ── TOOLTIP ────────────────────────────────────────────────────────────────
+(function initTooltips(){
+  const style=document.createElement('style');
+  style.textContent=`
+    [data-tip]{position:relative;}
+    [data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;font-size:10px;padding:4px 8px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:9999;font-family:'DM Sans',sans-serif;}
+    [data-tip]:hover::after{opacity:1;}
+  `;
+  document.head.appendChild(style);
+})();
+
+// ── KONFIRMASI UX ─────────────────────────────────────────────────────────
+function confirmDanger(msg){
+  return new Promise(resolve=>{
+    // Buat confirm modal yang lebih bagus
+    const old=document.getElementById('confirm-modal');
+    if(old)old.remove();
+    const div=document.createElement('div');
+    div.id='confirm-modal';
+    div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadeIn .15s ease';
+    div.innerHTML=`
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;width:340px;max-width:95vw;box-shadow:var(--shadow);animation:slideUp .2s ease">
+        <div style="font-size:32px;text-align:center;margin-bottom:12px">⚠️</div>
+        <div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px">Konfirmasi</div>
+        <div style="font-size:12px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:20px">${msg}</div>
+        <div style="display:flex;gap:8px">
+          <button id="conf-no" style="flex:1;padding:9px;border:1px solid var(--border2);border-radius:var(--radius-xs);background:transparent;font-size:12px;cursor:pointer;color:var(--text2);font-family:DM Sans,sans-serif">Batal</button>
+          <button id="conf-yes" style="flex:1;padding:9px;border:none;border-radius:var(--radius-xs);background:var(--red);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:Syne,sans-serif">Ya, Lanjutkan</button>
+        </div>
+      </div>`;
+    document.body.appendChild(div);
+    document.getElementById('conf-no').onclick=()=>{div.remove();resolve(false);};
+    document.getElementById('conf-yes').onclick=()=>{div.remove();resolve(true);};
+    div.onclick=e=>{if(e.target===div){div.remove();resolve(false);}};
+  });
+}
+
+// Override fungsi hapus agar pakai confirmDanger
+const _origDelUser=delUser;
+window.delUser=async(id,name)=>{
+  const ok=await confirmDanger(`Hapus user <b>${name}</b>?<br>Semua tugas yang diassign ke user ini akan menjadi unassigned.`);
+  if(!ok)return;
+  try{
+    const r=await fetch(`/api/users/${id}`,{method:'DELETE'});
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    await loadAll();toast('User berhasil dihapus','info');
+  }catch(e){toast(e.message,'error');}
+};
+
+const _origRejectU=rejectU;
+window.rejectU=async(id,name)=>{
+  const ok=await confirmDanger(`Tolak pendaftaran <b>${name}</b>?<br>User tidak akan bisa login dengan akun ini.`);
+  if(!ok)return;
+  try{await fetch(`/api/auth/pending/${id}/reject`,{method:'POST'});await loadAll();toast('Pendaftaran ditolak','info');}
+  catch(e){toast('Gagal menolak','error');}
+};
 
 // ── SESSION ────────────────────────────────────────────────────────────────
 fetch('/api/auth/me').then(r=>r.json()).then(d=>{if(d.id){CU=d;showApp();}}).catch(()=>{});
