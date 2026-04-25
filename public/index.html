@@ -470,11 +470,38 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
 
 <!-- MODAL: TAMBAH TUGAS -->
 <div class="ovl" id="m-task">
-  <div class="modal">
+  <div class="modal" style="width:500px">
     <div class="mtl">＋ Tambah Tugas Baru</div>
-    <div class="fg"><label>Judul</label><input type="text" id="ft" placeholder="Judul tugas..."></div>
+    <!-- Tipe tugas -->
+    <div class="fg">
+      <label>Tipe Tugas</label>
+      <div style="display:flex;gap:8px">
+        <div id="tipe-individu" onclick="switchTipe('individu')" style="flex:1;padding:10px;border:1px solid var(--accent);border-radius:var(--radius-sm);cursor:pointer;text-align:center;background:var(--accent-dim)">
+          <div style="font-size:18px">👤</div>
+          <div style="font-size:11px;font-weight:600;color:var(--accent)">Individu</div>
+        </div>
+        <div id="tipe-group" onclick="switchTipe('group')" style="flex:1;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);cursor:pointer;text-align:center">
+          <div style="font-size:18px">👥</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text3)">Group</div>
+        </div>
+      </div>
+    </div>
+    <div class="fg"><label>Judul Tugas</label><input type="text" id="ft" placeholder="Judul tugas..."></div>
     <div class="fg"><label>Deskripsi</label><textarea id="fd" placeholder="Detail..."></textarea></div>
-    <div class="fg"><label>Assignee</label><select id="fa"></select></div>
+    <!-- Individu fields -->
+    <div id="field-individu">
+      <div class="fg"><label>Assignee</label><select id="fa"></select></div>
+    </div>
+    <!-- Group fields -->
+    <div id="field-group" style="display:none">
+      <div class="fg"><label>Nama Group</label><input type="text" id="fgn" placeholder="Nama group tugas..."></div>
+      <div class="fg"><label>PIC (Penanggung Jawab)</label><select id="fpic"></select></div>
+      <div class="fg">
+        <label>Anggota Group</label>
+        <div id="member-list" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px;border:1px solid var(--border2);border-radius:var(--radius-sm);min-height:44px;background:var(--surface2)"></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px">Klik user untuk tambah/hapus anggota</div>
+      </div>
+    </div>
     <div class="grid2">
       <div class="fg"><label>Prioritas</label><select id="fpr"><option value="high">🔴 Tinggi</option><option value="med" selected>🟡 Sedang</option><option value="low">🟢 Rendah</option></select></div>
       <div class="fg"><label>Deadline</label><input type="date" id="fdl"></div>
@@ -779,18 +806,25 @@ function rKanban(){
         const dl=new Date(t.deadline),ov=t.deadline&&dl<today&&t.status!=='done';
         const isMe=t.assignee_id===CU.id,canAct=isMe||CU.role==='manager';
         const ns=SNXT[t.status];
+        // cek apakah user adalah PIC group atau assignee individu
+        const isPIC=t.is_group&&t.pic_id===CU.id;
+        const isAssignee=!t.is_group&&t.assignee_id===CU.id;
+        const isMember=t.is_group&&t.member_ids&&t.member_ids.includes(CU.id);
+        canAct=(isPIC||isAssignee||CU.role==='manager');
         return`<div class="tcard" draggable="true" data-id="${t.id}" ondragstart="dStart(event)" ondragend="dEnd(event)">
+          ${t.is_group?`<div style="font-size:9px;background:var(--purple-dim);color:var(--purple);padding:2px 7px;border-radius:99px;display:inline-flex;align-items:center;gap:3px;margin-bottom:5px">👥 ${t.group_name||'Group'}</div>`:'<div style="font-size:9px;background:var(--blue-dim);color:var(--blue);padding:2px 7px;border-radius:99px;display:inline-flex;align-items:center;gap:3px;margin-bottom:5px">👤 Individu</div>'}
           <div class="ttl">${t.title}</div>
           <div class="tmt">
             <span class="pbdg ${t.priority}">${PL[t.priority]}</span>
             ${t.deadline?`<span class="tdl${ov?' ov':''}">${ov?'⚠ Terlambat':t.deadline}</span>`:''}
           </div>
-          ${t.assignee_name?`<div class="tass">👤 ${t.assignee_name}</div>`:''}
-          ${canAct?`<div class="tact">
-            ${ns?`<button class="tbtn3 ${ns==='done'?'go':ns==='review'?'rv':'pr'}" onclick="openStatusModal(${t.id},'${ns}','${esc(t.title)}')">${SNXTL[t.status]}</button>`:''}
-            ${t.status!=='todo'?`<button class="tbtn3" onclick="openStatusModal(${t.id},'todo','${esc(t.title)}')">↩ Reset</button>`:''}
-            <button class="tbtn3" onclick="viewSubs(${t.id},'${esc(t.title)}')">📁</button>
-          </div>`:''}
+          ${t.is_group?`<div class="tass">⭐ PIC: ${t.pic_name}</div><div class="tass" style="margin-top:2px">👥 ${t.member_names?t.member_names.join(', '):'—'}</div>`:(t.assignee_name?`<div class="tass">👤 ${t.assignee_name}</div>`:'')}
+          <div class="tact">
+            ${canAct&&ns?`<button class="tbtn3 ${ns==='done'?'go':ns==='review'?'rv':'pr'}" onclick="openStatusModal(${t.id},'${ns}','${esc(t.title)}')">${SNXTL[t.status]}</button>`:''}
+            ${canAct&&t.status!=='todo'?`<button class="tbtn3" onclick="openStatusModal(${t.id},'todo','${esc(t.title)}')">↩</button>`:''}
+            ${(isMember||isAssignee||isPIC||CU.role==='manager')?`<button class="tbtn3" onclick="openTaskDetail(${t.id},'${esc(t.title)}')">💬</button>`:''}
+            ${(isPIC||isAssignee||CU.role==='manager')?`<button class="tbtn3" onclick="viewSubs(${t.id},'${esc(t.title)}')">📁</button>`:''}
+          </div>
         </div>`;
       }).join('')}
       <div class="dz" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="dropTask(event,'${col.id}')">Letakkan di sini</div>
@@ -1110,13 +1144,72 @@ document.querySelectorAll('.ovl').forEach(o=>o.addEventListener('click',e=>{if(e
 // ── ACTIONS ────────────────────────────────────────────────────────────────
 async function approveU(id){try{const r=await fetch(`/api/auth/pending/${id}/approve`,{method:'POST'});if(!r.ok)throw new Error();await loadAll();toast('User disetujui!','success');}catch(e){toast('Gagal','error');}}
 async function rejectU(id,name){if(!confirm(`Tolak "${name}"?`))return;try{await fetch(`/api/auth/pending/${id}/reject`,{method:'POST'});await loadAll();toast('Ditolak','info');}catch(e){toast('Gagal','error');}}
+// Tipe tugas
+let currentTipe='individu';
+let selectedMembers=new Set();
+
+function switchTipe(tipe){
+  currentTipe=tipe;
+  const ti=document.getElementById('tipe-individu');
+  const tg=document.getElementById('tipe-group');
+  const fi=document.getElementById('field-individu');
+  const fg=document.getElementById('field-group');
+  if(tipe==='individu'){
+    ti.style.border='1px solid var(--accent)';ti.style.background='var(--accent-dim)';
+    ti.querySelector('div:last-child').style.color='var(--accent)';
+    tg.style.border='1px solid var(--border2)';tg.style.background='transparent';
+    tg.querySelector('div:last-child').style.color='var(--text3)';
+    fi.style.display='block';fg.style.display='none';
+  } else {
+    tg.style.border='1px solid var(--accent)';tg.style.background='var(--accent-dim)';
+    tg.querySelector('div:last-child').style.color='var(--accent)';
+    ti.style.border='1px solid var(--border2)';ti.style.background='transparent';
+    ti.querySelector('div:last-child').style.color='var(--text3)';
+    fi.style.display='none';fg.style.display='block';
+    renderMemberPicker();
+  }
+}
+
+function renderMemberPicker(){
+  const allNonMgr=AU.filter(u=>u.role!=='manager');
+  const pic=document.getElementById('fpic');
+  pic.innerHTML=allNonMgr.map(u=>`<option value="${u.id}">${u.name} — ${RL[u.role]}</option>`).join('');
+  const ml=document.getElementById('member-list');
+  ml.innerHTML=allNonMgr.map((u,i)=>{
+    const sel=selectedMembers.has(u.id);
+    const ci=AVC[i%AVC.length];
+    return`<div onclick="toggleMember(${u.id})" id="mb-${u.id}" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;border:1px solid ${sel?'var(--accent)':'var(--border2)'};background:${sel?'var(--accent-dim)':'transparent'};cursor:pointer;transition:all .15s;font-size:11px;font-weight:500;color:${sel?'var(--accent)':'var(--text2)'}">
+      <div style="width:20px;height:20px;border-radius:50%;background:${ci[0]};color:${ci[1]};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${u.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()}</div>
+      ${u.name.split(' ')[0]}
+    </div>`;
+  }).join('');
+}
+
+function toggleMember(uid){
+  if(selectedMembers.has(uid))selectedMembers.delete(uid);
+  else selectedMembers.add(uid);
+  renderMemberPicker();
+}
+
 async function saveTask(){
   const title=document.getElementById('ft').value.trim();if(!title){toast('Judul wajib!','error');return;}
   setSp('sp-task',true);
   try{
-    const r=await fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description:document.getElementById('fd').value,assignee_id:document.getElementById('fa').value,priority:document.getElementById('fpr').value,deadline:document.getElementById('fdl').value})});
+    let r,body;
+    if(currentTipe==='individu'){
+      body={title,description:document.getElementById('fd').value,assignee_id:document.getElementById('fa').value,priority:document.getElementById('fpr').value,deadline:document.getElementById('fdl').value};
+      r=await fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    } else {
+      const picId=document.getElementById('fpic').value;
+      const members=Array.from(selectedMembers);
+      if(members.length===0){toast('Pilih minimal 1 anggota!','error');setSp('sp-task',false);return;}
+      body={title,description:document.getElementById('fd').value,priority:document.getElementById('fpr').value,deadline:document.getElementById('fdl').value,group_name:document.getElementById('fgn').value||title,pic_id:picId,member_ids:members};
+      r=await fetch('/api/tasks/group',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }
     const d=await r.json();if(!r.ok)throw new Error(d.error);
-    closeM('m-task');document.getElementById('ft').value='';document.getElementById('fd').value='';
+    closeM('m-task');
+    document.getElementById('ft').value='';document.getElementById('fd').value='';
+    selectedMembers=new Set();switchTipe('individu');
     await loadAll();toast('Tugas ditambahkan!','success');
   }catch(e){toast(e.message||'Gagal','error');}finally{setSp('sp-task',false);}
 }
@@ -1151,6 +1244,68 @@ async function doChpass(){
   }catch(e){err.style.display='block';err.textContent=e.message;}finally{setSp('sp-cp',false);}
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── TASK DETAIL (komentar + submission untuk anggota) ──────────────────────
+async function openTaskDetail(taskId,title){
+  document.getElementById('msub-title').textContent=`💬 Detail: ${title}`;
+  document.getElementById('sub-timeline').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">Memuat...</div>';
+  openM('m-subs');
+  try{
+    const [subR,comR]=await Promise.all([
+      fetch(`/api/tasks/${taskId}/submissions`),
+      fetch(`/api/tasks/${taskId}/comments`)
+    ]);
+    const subs=await subR.json();
+    const coms=await comR.json();
+    // Gabung dan sort by time
+    const all=[
+      ...subs.map(s=>({...s,_type:'sub'})),
+      ...coms.map(c=>({...c,_type:'comment'}))
+    ].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+
+    const task=AT.find(t=>t.id===taskId);
+    const isPIC=task&&task.is_group&&task.pic_id===CU.id;
+    const isAssignee=task&&!task.is_group&&task.assignee_id===CU.id;
+    const canUpdate=isPIC||isAssignee||CU.role==='manager';
+
+    document.getElementById('sub-timeline').innerHTML=`
+      ${all.length===0?'<div class="empty"><span class="eico">📭</span>Belum ada aktivitas</div>':''}
+      ${all.map(item=>{
+        if(item._type==='sub')return renderSubItem(item);
+        return`<div class="sub-item">
+          <div class="sub-icon" style="background:var(--surface3);border-color:var(--border2);font-size:14px">💬</div>
+          <div class="sub-body">
+            <div class="sub-header"><span class="sub-name">${item.user_name}</span><span class="sub-time">${new Date(item.created_at).toLocaleString('id-ID')}</span></div>
+            <div class="sub-note">${esc(item.comment)}</div>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:8px">
+        <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px">Tambah Komentar</div>
+        <div style="display:flex;gap:8px">
+          <textarea id="new-comment-${taskId}" placeholder="Tulis komentar..." style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:12px;color:var(--text);background:var(--surface2);font-family:DM Sans,sans-serif;outline:none;resize:none;height:70px"></textarea>
+          <button onclick="postComment(${taskId})" class="bsave" style="align-self:flex-end">Kirim</button>
+        </div>
+        ${canUpdate?`<button onclick="closeM('m-subs');openStatusModal(${taskId},'${SNXT[task?.status]||'done'}','${esc(title)}')" class="bsave" style="margin-top:10px;width:100%;justify-content:center">⚡ Update Status</button>`:''}
+      </div>
+    `;
+  }catch(e){document.getElementById('sub-timeline').innerHTML='<div class="empty">Gagal memuat</div>';}
+}
+
+async function postComment(taskId){
+  const el=document.getElementById(`new-comment-${taskId}`);
+  const comment=el?.value?.trim();
+  if(!comment){toast('Komentar kosong','error');return;}
+  try{
+    const r=await fetch(`/api/tasks/${taskId}/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({comment})});
+    if(!r.ok)throw new Error();
+    el.value='';
+    // Refresh detail
+    const task=AT.find(t=>t.id===taskId);
+    await openTaskDetail(taskId,task?.title||'');
+    toast('Komentar terkirim','success');
+  }catch(e){toast('Gagal kirim komentar','error');}
+}
 
 // ── SESSION ────────────────────────────────────────────────────────────────
 fetch('/api/auth/me').then(r=>r.json()).then(d=>{if(d.id){CU=d;showApp();}}).catch(()=>{});
