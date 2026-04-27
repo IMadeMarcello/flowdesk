@@ -3,3 +3,4 @@ db.json
 public/uploads/
 *.db
 sessions.db
+db_backup_*.json

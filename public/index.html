@@ -353,7 +353,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
       <div class="si" onclick="showSec('kanban',this)"><span class="ico">🗂️</span><span class="lbl">Kanban</span></div>
       <div class="si" onclick="showSec('tasks',this)"><span class="ico">📋</span><span class="lbl">Daftar Tugas</span></div>
       <div class="si" onclick="showSec('calendar',this)"><span class="ico">📅</span><span class="lbl">Kalender</span></div>
-      <div class="si" onclick="showSec('chat',this)"><span class="ico">💬</span><span class="lbl">Chat</span></div>
+      <div class="si" onclick="showSec('chat',this)"><span class="ico">💬</span><span class="lbl">Chat</span><span class="sib" id="chat-sidebar-badge" style="display:none">0</span></div>
       <div class="si" onclick="showSec('notif',this)"><span class="ico">🔔</span><span class="lbl">Notifikasi</span><span class="sib" id="nb" style="display:none">0</span></div>
       <div class="sg mo" style="display:none">Manajemen</div>
       <div class="si mo" onclick="showSec('submissions',this)" style="display:none"><span class="ico">📁</span><span class="lbl">Pengumpulan</span></div>
@@ -1002,7 +1002,42 @@ function calP(){if(cM===0){cM=11;cY--;}else cM--;rCal();}
 function calN(){if(cM===11){cM=0;cY++;}else cM++;rCal();}
 
 // ── CHAT ───────────────────────────────────────────────────────────────────
-function startChatPoll(){clearInterval(chatTimer);chatTimer=setInterval(()=>{if(chatTarget!==null||chatMode==='group')refreshMsgs();},4000);}
+function startChatPoll(){
+  clearInterval(chatTimer);
+  chatTimer=setInterval(async()=>{
+    if(chatTarget!==null||chatMode==='group') refreshMsgs();
+    await checkUnread();
+  },4000);
+  checkUnread();
+}
+
+async function checkUnread(){
+  try{
+    const r=await fetch('/api/chat/unread');
+    const data=await r.json();
+    const badge=document.getElementById('chat-sidebar-badge');
+    if(badge){
+      badge.textContent=data.total;
+      badge.style.display=data.total>0?'inline':'none';
+    }
+    // Update badge per kontak di list
+    if(data.personal){
+      Object.keys(data.personal).forEach(uid=>{
+        const el=document.getElementById(`unread-${uid}`);
+        if(el){
+          el.textContent=data.personal[uid];
+          el.style.display=data.personal[uid]>0?'flex':'none';
+        }
+      });
+    }
+    // Update badge group
+    const gel=document.getElementById('unread-group');
+    if(gel){
+      gel.textContent=data.group;
+      gel.style.display=data.group>0?'flex':'none';
+    }
+  }catch(e){}
+}
 function switchCTab(mode,el){
   chatMode=mode;chatTarget=null;
   document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
@@ -1016,7 +1051,10 @@ async function loadChatContacts(){
     list.innerHTML=`<div class="chat-item on" onclick="openGroupChat(this)">
       <div class="ci-av" style="background:var(--accent-dim);color:var(--accent);font-size:18px">🌐</div>
       <div class="ci-info">
-        <div class="ci-name">Group Chat</div>
+        <div class="ci-name" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Group Chat</span>
+          <span id="unread-group" style="display:none;background:var(--accent);color:#0D0D0F;border-radius:99px;font-size:9px;font-weight:700;width:18px;height:18px;align-items:center;justify-content:center">0</span>
+        </div>
         <div class="ci-prev">Semua anggota tim</div>
       </div>
     </div>`;
@@ -1066,9 +1104,13 @@ async function openPersonalChat(uid,name,el){
   chatTarget=uid;
   document.querySelectorAll('.chat-item').forEach(c=>c.classList.remove('on'));
   if(el)el.classList.add('on');
+  // Tandai sudah dibaca
+  await fetch(`/api/chat/read/${uid}`,{method:'PATCH'});
   const msgs=await fetchMsgs();
-  const ci=AVC[AU.findIndex(u=>u.id===uid)%AVC.length]||AVC[0];
+  const uIdx=AU.findIndex(u=>u.id===uid);
+  const ci=AVC[uIdx>=0?uIdx%AVC.length:0];
   renderChatRight(name,RL[AU.find(u=>u.id===uid)?.role]||'',ci,msgs);
+  await checkUnread();
 }
 
 async function fetchMsgs(){
@@ -1122,7 +1164,9 @@ async function sendMsg(){
   if(chatMode==='personal'&&chatTarget)body.to_user_id=chatTarget;
   try{
     await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    inp.value='';await refreshMsgs();
+    inp.value='';
+    inp.style.height='38px';
+    await refreshMsgs();
   }catch(e){toast('Gagal kirim pesan','error');}
 }
 
