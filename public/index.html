@@ -1210,15 +1210,66 @@ function renderMemberPicker(){
   const allNonMgr=AU.filter(u=>u.role!=='manager');
   const pic=document.getElementById('fpic');
   pic.innerHTML=allNonMgr.map(u=>`<option value="${u.id}">${u.name} — ${RL[u.role]}</option>`).join('');
-  const ml=document.getElementById('member-list');
-  ml.innerHTML=allNonMgr.map((u,i)=>{
-    const sel=selectedMembers.has(u.id);
-    const ci=AVC[i%AVC.length];
-    return`<div onclick="toggleMember(${u.id})" id="mb-${u.id}" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;border:1px solid ${sel?'var(--accent)':'var(--border2)'};background:${sel?'var(--accent-dim)':'transparent'};cursor:pointer;transition:all .15s;font-size:11px;font-weight:500;color:${sel?'var(--accent)':'var(--text2)'}">
-      <div style="width:20px;height:20px;border-radius:50%;background:${ci[0]};color:${ci[1]};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${u.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()}</div>
-      ${u.name.split(' ')[0]}
+
+  // Panel kiri: daftar semua user yang bisa dipilih
+  const available=allNonMgr.filter(u=>!selectedMembers.has(u.id));
+  const selected=allNonMgr.filter(u=>selectedMembers.has(u.id));
+
+  document.getElementById('member-list').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+      <!-- Kiri: tersedia -->
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Tersedia (${available.length})</div>
+        <div style="border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;max-height:160px;overflow-y:auto">
+          ${available.length===0
+            ?'<div style="padding:12px;text-align:center;font-size:11px;color:var(--text3)">Semua sudah dipilih</div>'
+            :available.map((u,i)=>{
+              const ci=AVC[i%AVC.length];
+              return`<div onclick="addMember(${u.id})" style="display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+                <div style="width:24px;height:24px;border-radius:50%;background:${ci[0]};color:${ci[1]};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">${u.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:11px;font-weight:500;color:var(--text)">${u.name}</div>
+                  <div style="font-size:9px;color:var(--text3)">${RL[u.role]}</div>
+                </div>
+                <div style="font-size:14px;color:var(--teal)">＋</div>
+              </div>`;
+            }).join('')}
+        </div>
+      </div>
+      <!-- Kanan: sudah dipilih -->
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Anggota Group (${selected.length})</div>
+        <div style="border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;max-height:160px;overflow-y:auto">
+          ${selected.length===0
+            ?'<div style="padding:12px;text-align:center;font-size:11px;color:var(--text3)">Belum ada anggota</div>'
+            :selected.map((u,i)=>{
+              const ci=AVC[i%AVC.length];
+              const isPIC=parseInt(document.getElementById('fpic')?.value)===u.id;
+              return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--accent-dim)">
+                <div style="width:24px;height:24px;border-radius:50%;background:${ci[0]};color:${ci[1]};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">${u.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:11px;font-weight:500;color:var(--text)">${u.name}</div>
+                  <div style="font-size:9px;color:${isPIC?'var(--amber)':'var(--text3)'}">${isPIC?'⭐ PIC':RL[u.role]}</div>
+                </div>
+                <div onclick="removeMember(${u.id})" style="font-size:14px;color:var(--red);cursor:pointer;padding:2px 4px" title="Hapus">✕</div>
+              </div>`;
+            }).join('')}
+        </div>
+        ${selected.length>0?`<div style="margin-top:6px;padding:6px 10px;background:var(--surface2);border-radius:var(--radius-xs);font-size:10px;color:var(--text3)">
+          Total: <b style="color:var(--text)">${selected.length} anggota</b>
+        </div>`:''}
+      </div>
     </div>`;
-  }).join('');
+}
+
+function addMember(uid){
+  selectedMembers.add(uid);
+  renderMemberPicker();
+}
+
+function removeMember(uid){
+  selectedMembers.delete(uid);
+  renderMemberPicker();
 }
 
 function toggleMember(uid){
