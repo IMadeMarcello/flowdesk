@@ -1961,6 +1961,68 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 });
 
+// ── TASK DETAIL (komentar + submission untuk anggota) ──────────────────────
+async function openTaskDetail(taskId,title){
+  document.getElementById('msub-title').textContent=`💬 Detail: ${title}`;
+  document.getElementById('sub-timeline').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">Memuat...</div>';
+  openM('m-subs');
+  try{
+    const [subR,comR]=await Promise.all([
+      fetch(`/api/tasks/${taskId}/submissions`),
+      fetch(`/api/tasks/${taskId}/comments`)
+    ]);
+    const subs=await subR.json();
+    const coms=await comR.json();
+    // Gabung dan sort by time
+    const all=[
+      ...subs.map(s=>({...s,_type:'sub'})),
+      ...coms.map(c=>({...c,_type:'comment'}))
+    ].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+
+    const task=AT.find(t=>t.id===taskId);
+    const isPIC=task&&task.is_group&&task.pic_id===CU.id;
+    const isAssignee=task&&!task.is_group&&task.assignee_id===CU.id;
+    const canUpdate=isPIC||isAssignee||CU.role==='manager';
+
+    document.getElementById('sub-timeline').innerHTML=`
+      ${all.length===0?'<div class="empty"><span class="eico">📭</span>Belum ada aktivitas</div>':''}
+      ${all.map(item=>{
+        if(item._type==='sub')return renderSubItem(item);
+        return`<div class="sub-item">
+          <div class="sub-icon" style="background:var(--surface3);border-color:var(--border2);font-size:14px">💬</div>
+          <div class="sub-body">
+            <div class="sub-header"><span class="sub-name">${item.user_name}</span><span class="sub-time">${new Date(item.created_at).toLocaleString('id-ID')}</span></div>
+            <div class="sub-note">${esc(item.comment)}</div>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:8px">
+        <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px">Tambah Komentar</div>
+        <div style="display:flex;gap:8px">
+          <textarea id="new-comment-${taskId}" placeholder="Tulis komentar..." style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:12px;color:var(--text);background:var(--surface2);font-family:DM Sans,sans-serif;outline:none;resize:none;height:70px"></textarea>
+          <button onclick="postComment(${taskId})" class="bsave" style="align-self:flex-end">Kirim</button>
+        </div>
+        ${canUpdate?`<button onclick="closeM('m-subs');openStatusModal(${taskId},'${SNXT[task?.status]||'done'}','${esc(title)}')" class="bsave" style="margin-top:10px;width:100%;justify-content:center">⚡ Update Status</button>`:''}
+      </div>
+    `;
+  }catch(e){document.getElementById('sub-timeline').innerHTML='<div class="empty">Gagal memuat</div>';}
+}
+
+async function postComment(taskId){
+  const el=document.getElementById(`new-comment-${taskId}`);
+  const comment=el?.value?.trim();
+  if(!comment){toast('Komentar kosong','error');return;}
+  try{
+    const r=await fetch(`/api/tasks/${taskId}/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({comment})});
+    if(!r.ok)throw new Error();
+    el.value='';
+    // Refresh detail
+    const task=AT.find(t=>t.id===taskId);
+    await openTaskDetail(taskId,task?.title||'');
+    toast('Komentar terkirim','success');
+  }catch(e){toast('Gagal kirim komentar','error');}
+}
+
 // ── SESSION ────────────────────────────────────────────────────────────────
 fetch('/api/auth/me').then(r=>r.json()).then(d=>{if(d.id){CU=d;showApp();}}).catch(()=>{});
 </script>
