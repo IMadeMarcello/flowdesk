@@ -294,8 +294,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
 .upload-area .ua-text{font-size:12px;color:var(--text3);}
 .upload-preview{margin-top:10px;display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-xs);font-size:11px;color:var(--text2);}
 
-@media(max-width:900px){.sg4{grid-template-columns:repeat(2,1fr)}.cg2{grid-template-columns:1fr}.kbb{grid-template-columns:repeat(2,1fr)}.chat-wrap{grid-template-columns:1fr}}
-@media(max-width:600px){.sidebar{display:none}.content{padding:14px}.topbar{padding:0 10px;gap:6px}}
+.cg2{grid-template-columns:1fr}.kbb{grid-template-columns:repeat(2,1fr)}.chat-wrap{grid-template-columns:1fr}}
+.content{padding:14px}.topbar{padding:0 10px;gap:6px}}
 
 /* ═══════ MOBILE RESPONSIVE ═══════ */
 /* Bottom Nav */
@@ -339,9 +339,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
 .pm-lbl{font-size:13px;font-weight:500;color:var(--text);}
 .pm-sub{font-size:11px;color:var(--text3);}
 
-@media(max-width:768px){
-  /* Sembunyikan desktop elements */
-  .sidebar{display:none!important;}
+
   .topbar{display:none!important;}
   /* Tampilkan mobile elements */
   .mobile-header{display:flex!important;}
@@ -375,6 +373,126 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
   .modal{width:100%!important;border-radius:0!important;max-height:100vh!important;}
   .ovl{align-items:flex-end!important;}
   .modal{border-radius:20px 20px 0 0!important;max-height:90vh!important;}
+}
+
+/* ═══ FORCE MOBILE ═══ */
+
+  .topbar{display:none!important;}
+  .mobile-header{display:flex!important;}
+  .mobile-nav{display:block!important;}
+  .app-body{overflow-y:auto!important;}
+  .content{padding:14px 12px 80px!important;overflow-y:visible!important;}
+  .sg4{grid-template-columns:1fr 1fr!important;gap:8px!important;}
+  .cg2{grid-template-columns:1fr!important;}
+  .kbb{display:flex!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;scroll-snap-type:x mandatory!important;gap:10px!important;padding-bottom:8px!important;}
+  .kbc{min-width:72vw!important;scroll-snap-align:start!important;flex-shrink:0!important;}
+  .chat-wrap{grid-template-columns:1fr!important;height:calc(100vh - 120px)!important;}
+  .chat-left{display:none!important;}
+  .chat-left.show{display:flex!important;position:fixed!important;inset:0!important;z-index:300!important;background:var(--surface)!important;}
+  .ovl.on{align-items:flex-end!important;}
+  .modal{border-radius:20px 20px 0 0!important;width:100%!important;max-height:88vh!important;}
+  .set{font-size:17px!important;}
+  .sc{padding:12px 14px!important;}
+  .svl{font-size:24px!important;}
+  .fab{display:flex!important;}
+  .dtb{font-size:11px!important;}
+  .dtb th,.dtb td{padding:8px!important;}
+  #sec-calendar>div{grid-template-columns:1fr!important;}
+  .calcard{width:100%!important;}
+}
+
+/* ═══════════════ MOBILE RESPONSIVE ═══════════════ */
+@media screen and (max-width:900px){
+  .sg4{grid-template-columns:1fr 1fr!important;}
+  .cg2{grid-template-columns:1fr!important;}
+  .kbb{grid-template-columns:repeat(2,1fr)!important;}
+}
+@media screen and (max-width:768px){
+  /* Sembunyikan desktop nav */
+  .sidebar{display:none!important;}
+  .topbar{display:none!important;}
+  /* Tampilkan mobile nav */
+  .mobile-header{display:flex!important;}
+  .mobile-nav{display:block!important;}
+  /* Layout */
+  .app-body{flex-direction:column!important;overflow-y:auto!important;height:auto!important;}
+  #app-page{height:100vh!important;overflow:hidden!important;}
+  .content{
+    flex:1!important;
+    padding:14px 12px 76px!important;
+    overflow-y:auto!important;
+    height:calc(100vh - 54px)!important;
+  }
+  /* Stats */
+  .sg4{grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:14px!important;}
+  .sc{padding:12px!important;}
+  .svl{font-size:22px!important;}
+  .ssb{font-size:10px!important;}
+  /* Charts */
+  .cg2{grid-template-columns:1fr!important;gap:8px!important;}
+  .cw{height:150px!important;}
+  .mbc{padding:14px!important;}
+  /* Kanban - scroll horizontal */
+  .kbb{
+    display:flex!important;
+    flex-direction:row!important;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    scroll-snap-type:x mandatory!important;
+    gap:10px!important;
+    padding-bottom:10px!important;
+  }
+  .kbc{
+    min-width:78vw!important;
+    max-width:78vw!important;
+    scroll-snap-align:start!important;
+    flex-shrink:0!important;
+  }
+  /* Table */
+  .dtb{font-size:11px!important;display:block!important;overflow-x:auto!important;}
+  .dtb th,.dtb td{padding:7px 10px!important;white-space:nowrap!important;}
+  /* Calendar */
+  #sec-calendar>div{display:block!important;}
+  .calcard{width:100%!important;margin-bottom:14px!important;}
+  /* Chat */
+  .chat-wrap{
+    display:block!important;
+    height:calc(100vh - 130px)!important;
+    position:relative!important;
+  }
+  .chat-left{
+    display:none!important;
+    position:fixed!important;
+    inset:0!important;
+    z-index:300!important;
+    background:var(--surface)!important;
+    flex-direction:column!important;
+  }
+  .chat-left.show{display:flex!important;}
+  .chat-right{height:calc(100vh - 130px)!important;}
+  /* Modal dari bawah */
+  .ovl.on{align-items:flex-end!important;}
+  .modal{
+    border-radius:20px 20px 0 0!important;
+    width:100%!important;
+    max-width:100%!important;
+    max-height:90vh!important;
+    margin:0!important;
+  }
+  /* FAB tampil */
+  .fab{display:flex!important;}
+  /* Section title */
+  .set{font-size:17px!important;}
+  .ses{font-size:11px!important;}
+  /* Sembunyikan tbtn2 di topbar */
+  .tbtn2{display:none!important;}
+  /* Filter row wrap */
+  .frow{flex-wrap:wrap!important;}
+  .frow input,.frow select{font-size:12px!important;}
+  /* Pending card */
+  .pc{flex-wrap:wrap!important;gap:8px!important;}
+  /* Member row */
+  .mr{flex-wrap:wrap!important;}
 }
 </style>
 </head>
