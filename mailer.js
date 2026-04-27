@@ -1,27 +1,15 @@
 const nodemailer=require('nodemailer');
-
-const transporter=nodemailer.createTransport({
-  service:'gmail',
-  auth:{
-    user:process.env.EMAIL_USER||'',
-    pass:process.env.EMAIL_PASS||''
-  }
-});
-
+let transporter=null;
+try{
+  const config=require('./config');
+  transporter=nodemailer.createTransport({service:'gmail',auth:{user:config.email.user,pass:config.email.pass}});
+}catch(e){console.log('Email config tidak ada, skip email');}
 async function sendMail(to,subject,html){
-  if(!process.env.EMAIL_USER){
-    console.log(`📧 [Skip email] To:${to} Subject:${subject}`);
-    return;
-  }
+  if(!transporter){console.log(`[Email skip] To:${to} | ${subject}`);return;}
   try{
-    await transporter.sendMail({
-      from:process.env.EMAIL_FROM||process.env.EMAIL_USER,
-      to,subject,html
-    });
-    console.log(`📧 Email terkirim ke ${to}`);
-  }catch(e){
-    console.error(`❌ Gagal kirim email:`,e.message);
-  }
+    const config=require('./config');
+    await transporter.sendMail({from:config.email.from,to,subject,html});
+    console.log(`📧 Email ke ${to}`);
+  }catch(e){console.error('Email gagal:',e.message);}
 }
-
 module.exports={sendMail};
