@@ -296,6 +296,86 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
 
 @media(max-width:900px){.sg4{grid-template-columns:repeat(2,1fr)}.cg2{grid-template-columns:1fr}.kbb{grid-template-columns:repeat(2,1fr)}.chat-wrap{grid-template-columns:1fr}}
 @media(max-width:600px){.sidebar{display:none}.content{padding:14px}.topbar{padding:0 10px;gap:6px}}
+
+/* ═══════ MOBILE RESPONSIVE ═══════ */
+/* Bottom Nav */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom);}
+.mobile-nav-inner{display:flex;align-items:center;justify-content:space-around;height:58px;}
+.mn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 8px;cursor:pointer;color:var(--text3);transition:all .15s;position:relative;flex:1;}
+.mn-item.active{color:var(--accent);}
+[data-theme="light"] .mn-item.active{color:var(--accent2);}
+.mn-ico{font-size:22px;line-height:1;}
+.mn-lbl{font-size:9px;font-weight:600;letter-spacing:.3px;}
+.mn-bdg{position:absolute;top:2px;right:50%;transform:translateX(60%);background:var(--red);color:#fff;border-radius:99px;font-size:8px;font-weight:700;min-width:16px;height:16px;display:none;align-items:center;justify-content:center;padding:0 4px;}
+.mn-bdg.on{display:flex;}
+
+/* Mobile Header */
+.mobile-header{display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:54px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.mh-brand{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px;}
+.mh-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+[data-theme="light"] .mh-dot{background:var(--accent2);}
+.mh-right{display:flex;align-items:center;gap:8px;}
+.mh-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;}
+.mh-btn{padding:6px;border:1px solid var(--border2);border-radius:var(--radius-xs);background:transparent;color:var(--text2);font-size:14px;cursor:pointer;}
+
+/* Bottom Sheet (mobile modal) */
+.bs-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;backdrop-filter:blur(4px);}
+.bs-overlay.open{display:flex;align-items:flex-end;}
+.bs-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding:0 16px 32px;animation:bsUp .25s ease;}
+@keyframes bsUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.bs-handle{width:36px;height:4px;background:var(--border2);border-radius:99px;margin:12px auto 16px;display:block;}
+.bs-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;}
+
+/* FAB */
+.fab{display:none;position:fixed;bottom:70px;right:16px;width:52px;height:52px;background:var(--accent);border-radius:50%;border:none;cursor:pointer;z-index:150;box-shadow:0 4px 20px rgba(200,255,87,.4);font-size:22px;align-items:center;justify-content:center;transition:transform .15s;}
+.fab:hover{transform:scale(1.05);}
+[data-theme="light"] .fab{box-shadow:0 4px 20px rgba(45,106,0,.3);}
+
+/* Profile Sheet */
+.profile-menu{display:flex;flex-direction:column;gap:8px;}
+.pm-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;border:1px solid var(--border);}
+.pm-item:hover{background:var(--surface3);}
+.pm-ico{font-size:18px;width:24px;text-align:center;}
+.pm-lbl{font-size:13px;font-weight:500;color:var(--text);}
+.pm-sub{font-size:11px;color:var(--text3);}
+
+@media(max-width:768px){
+  /* Sembunyikan desktop elements */
+  .sidebar{display:none!important;}
+  .topbar{display:none!important;}
+  /* Tampilkan mobile elements */
+  .mobile-header{display:flex!important;}
+  .mobile-nav{display:block!important;}
+  .fab{display:flex!important;}
+  /* Content padding bawah untuk nav */
+  .content{padding:16px 14px 80px!important;}
+  /* App body full */
+  .app-body{flex-direction:column;}
+  /* Stats grid 2 kolom */
+  .sg4{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;}
+  /* Charts 1 kolom */
+  .cg2{grid-template-columns:1fr!important;}
+  /* Kanban scroll horizontal */
+  .kbb{display:flex!important;overflow-x:auto!important;gap:10px!important;padding-bottom:10px;scroll-snap-type:x mandatory;}
+  .kbc{min-width:260px!important;scroll-snap-align:start;flex-shrink:0;}
+  /* Chat layout 1 kolom */
+  .chat-wrap{grid-template-columns:1fr!important;height:calc(100vh - 130px)!important;}
+  .chat-left{display:none;}
+  .chat-left.show{display:flex!important;position:fixed;inset:0;z-index:250;background:var(--surface);}
+  /* Topbar btn hide */
+  .tbtn2{display:none!important;}
+  /* Table scroll */
+  .dtb{display:block;overflow-x:auto;}
+  /* Stat card compact */
+  .sc{padding:12px!important;}
+  .svl{font-size:24px!important;}
+  /* Calendar grid */
+  #sec-calendar > div{grid-template-columns:1fr!important;}
+  /* Modal full width */
+  .modal{width:100%!important;border-radius:0!important;max-height:100vh!important;}
+  .ovl{align-items:flex-end!important;}
+  .modal{border-radius:20px 20px 0 0!important;max-height:90vh!important;}
+}
 </style>
 </head>
 <body>
@@ -334,6 +414,103 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;font-size:14px;background
 
 <!-- APP -->
 <div id="app-page">
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header" id="mobile-header">
+    <div class="mh-brand"><div class="mh-dot"></div>FlowDesk</div>
+    <div class="mh-right">
+      <button class="mh-btn" onclick="toggleTheme()">🌙</button>
+      <div class="mh-av" id="mh-av" onclick="openProfileSheet()" title="Profil"></div>
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <div class="mn-item active" id="mn-dashboard" onclick="showSec('dashboard',this);setMobileNav('dashboard')">
+        <div class="mn-ico">📊</div><div class="mn-lbl">Dashboard</div>
+      </div>
+      <div class="mn-item" id="mn-kanban" onclick="showSec('kanban',this);setMobileNav('kanban')">
+        <div class="mn-ico">🗂️</div><div class="mn-lbl">Kanban</div>
+      </div>
+      <div class="mn-item" id="mn-chat" onclick="showSec('chat',this);setMobileNav('chat');loadChatContacts()">
+        <div class="mn-ico">💬</div><div class="mn-lbl">Chat</div>
+        <div class="mn-bdg" id="mn-chat-bdg">0</div>
+      </div>
+      <div class="mn-item" id="mn-notif" onclick="showSec('notif',this);setMobileNav('notif')">
+        <div class="mn-ico">🔔</div><div class="mn-lbl">Notif</div>
+        <div class="mn-bdg" id="mn-notif-bdg">0</div>
+      </div>
+      <div class="mn-item" id="mn-more" onclick="openMoreSheet()">
+        <div class="mn-ico">☰</div><div class="mn-lbl">Menu</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB (tambah tugas, hanya manager) -->
+  <button class="fab manager-only" id="fab-btn" onclick="openM('m-task')" style="display:none" title="Tambah Tugas">＋</button>
+
+  <!-- BOTTOM SHEET: PROFIL -->
+  <div class="bs-overlay" id="bs-profile" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="bs-sheet">
+      <div class="bs-handle"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
+        <div id="bs-av" style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0"></div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)" id="bs-name">-</div>
+          <div><span class="rb" id="bs-role">-</span></div>
+        </div>
+      </div>
+      <div class="profile-menu">
+        <div class="pm-item" onclick="closeBS('bs-profile');openM('m-chpass')">
+          <span class="pm-ico">🔑</span>
+          <div><div class="pm-lbl">Ganti Password</div><div class="pm-sub">Ubah password akun</div></div>
+        </div>
+        <div class="pm-item" onclick="toggleTheme()">
+          <span class="pm-ico" id="bs-theme-ico">🌙</span>
+          <div><div class="pm-lbl">Tema</div><div class="pm-sub">Toggle dark/light mode</div></div>
+        </div>
+        <div class="pm-item" onclick="doLogout()" style="border-color:var(--red-dim)">
+          <span class="pm-ico">🚪</span>
+          <div><div class="pm-lbl" style="color:var(--red)">Keluar</div><div class="pm-sub">Logout dari akun</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET: MORE MENU -->
+  <div class="bs-overlay" id="bs-more" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="bs-sheet">
+      <div class="bs-handle"></div>
+      <div class="bs-title">Menu Lainnya</div>
+      <div class="profile-menu">
+        <div class="pm-item" onclick="closeBS('bs-more');showSec('tasks',getMobileNavEl('tasks'));setMobileNav('tasks')">
+          <span class="pm-ico">📋</span>
+          <div><div class="pm-lbl">Daftar Tugas</div><div class="pm-sub">Lihat semua tugas</div></div>
+        </div>
+        <div class="pm-item" onclick="closeBS('bs-more');showSec('calendar',getMobileNavEl('calendar'));setMobileNav('calendar')">
+          <span class="pm-ico">📅</span>
+          <div><div class="pm-lbl">Kalender</div><div class="pm-sub">Lihat deadline</div></div>
+        </div>
+        <div class="pm-item manager-only" id="mn-submissions" style="display:none" onclick="closeBS('bs-more');showSec('submissions',getMobileNavEl('submissions'));setMobileNav('submissions')">
+          <span class="pm-ico">📁</span>
+          <div><div class="pm-lbl">Pengumpulan</div><div class="pm-sub">Bukti progres tugas</div></div>
+        </div>
+        <div class="pm-item manager-only" id="mn-users" style="display:none" onclick="closeBS('bs-more');showSec('users',getMobileNavEl('users'));setMobileNav('users')">
+          <span class="pm-ico">👥</span>
+          <div><div class="pm-lbl">Kelola User</div><div class="pm-sub">Tambah/hapus user</div></div>
+        </div>
+        <div class="pm-item manager-only" id="mn-pending" style="display:none" onclick="closeBS('bs-more');showSec('pending',getMobileNavEl('pending'));setMobileNav('pending')">
+          <span class="pm-ico">⏳</span>
+          <div><div class="pm-lbl">Permintaan Daftar</div><div class="pm-sub">Approve/reject user</div></div>
+        </div>
+        <div class="pm-item manager-only" id="mn-activity" style="display:none" onclick="closeBS('bs-more');showSec('activity',getMobileNavEl('activity'));setMobileNav('activity')">
+          <span class="pm-ico">📜</span>
+          <div><div class="pm-lbl">Log Aktivitas</div><div class="pm-sub">Riwayat semua aksi</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="topbar">
     <div class="tb-brand"><div class="tb-dot"></div>FlowDesk</div>
     <div class="tb-user" onclick="openM('m-profile')" title="Klik untuk edit profil" style="cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
@@ -1541,6 +1718,130 @@ window.rejectU=async(id,name)=>{
   try{await fetch(`/api/auth/pending/${id}/reject`,{method:'POST'});await loadAll();toast('Pendaftaran ditolak','info');}
   catch(e){toast('Gagal menolak','error');}
 };
+
+// ── MOBILE FUNCTIONS ──────────────────────────────────────────────────────
+function setMobileNav(name){
+  document.querySelectorAll('.mn-item').forEach(i=>i.classList.remove('active'));
+  const el=document.getElementById('mn-'+name);
+  if(el)el.classList.add('active');
+  // Tampilkan FAB hanya di kanban
+  const fab=document.getElementById('fab-btn');
+  if(fab)fab.style.display=(name==='kanban'&&CU?.role==='manager')?'flex':'none';
+}
+
+function getMobileNavEl(name){
+  return document.getElementById('mn-'+name)||document.querySelector('.si');
+}
+
+function openProfileSheet(){
+  const bs=document.getElementById('bs-profile');
+  if(!bs)return;
+  // Update info profil
+  const av=document.getElementById('bs-av');
+  const ci=AVC[CU?.role==='manager'?0:CU?.role==='teamlead'?1:2];
+  if(av){av.style.background=ci[0];av.style.color=ci[1];av.textContent=CU?.name?.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase()||'?';}
+  const nm=document.getElementById('bs-name');if(nm)nm.textContent=CU?.name||'-';
+  const rb=document.getElementById('bs-role');if(rb){rb.textContent=RL[CU?.role]||'-';rb.className='rb '+(CU?.role||'');}
+  const ti=document.getElementById('bs-theme-ico');
+  if(ti)ti.textContent=document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';
+  bs.classList.add('open');
+}
+
+function openMoreSheet(){
+  document.getElementById('bs-more')?.classList.add('open');
+}
+
+function closeBS(id){
+  document.getElementById(id)?.classList.remove('open');
+}
+
+// Update mobile header avatar
+function updateMobileHeader(){
+  const mhAv=document.getElementById('mh-av');
+  if(!mhAv||!CU)return;
+  const ci=AVC[CU.role==='manager'?0:CU.role==='teamlead'?1:2];
+  mhAv.style.background=ci[0];
+  mhAv.style.color=ci[1];
+  mhAv.textContent=CU.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+}
+
+// Update mobile badges
+function updateMobileBadges(){
+  // Notif badge
+  const nb=document.getElementById('nb');
+  const mnb=document.getElementById('mn-notif-bdg');
+  if(nb&&mnb){
+    mnb.textContent=nb.textContent;
+    mnb.className='mn-bdg'+(nb.style.display!=='none'?' on':'');
+  }
+  // Chat badge
+  const cb=document.getElementById('chat-sidebar-badge');
+  const mcb=document.getElementById('mn-chat-bdg');
+  if(cb&&mcb){
+    mcb.textContent=cb.textContent;
+    mcb.className='mn-bdg'+(cb.style.display!=='none'?' on':'');
+  }
+}
+
+// Override showApp untuk update mobile juga
+const _origShowApp=showApp;
+function showApp(){
+  _origShowApp();
+  setTimeout(()=>{
+    updateMobileHeader();
+    // Sync mobile badges setiap 3 detik
+    setInterval(updateMobileBadges,3000);
+  },500);
+}
+
+// Override loadNotifs untuk update mobile badge
+const _origLdNotifs=ldNotifs;
+async function ldNotifs(){
+  await _origLdNotifs();
+  updateMobileBadges();
+}
+
+// Chat mobile: tombol back ke list kontak
+function showChatList(){
+  document.querySelector('.chat-left')?.classList.add('show');
+}
+function hideChatList(){
+  document.querySelector('.chat-left')?.classList.remove('show');
+}
+
+// Override openPersonalChat untuk mobile
+const _origOpenPersonal=openPersonalChat;
+async function openPersonalChat(uid,name,el){
+  hideChatList();
+  await _origOpenPersonal(uid,name,el);
+  // Tambah tombol back di mobile
+  const hdr=document.querySelector('.chat-hdr');
+  if(hdr&&window.innerWidth<=768){
+    const backBtn=document.createElement('button');
+    backBtn.innerHTML='←';
+    backBtn.style.cssText='background:transparent;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:4px 8px;margin-right:4px;';
+    backBtn.onclick=showChatList;
+    hdr.insertBefore(backBtn,hdr.firstChild);
+  }
+}
+
+// Override loadChatContacts untuk mobile
+const _origLoadChat=loadChatContacts;
+async function loadChatContacts(){
+  await _origLoadChat();
+  if(window.innerWidth<=768){
+    showChatList();
+  }
+}
+
+// Swipe gesture untuk kanban (horizontal scroll hint)
+document.addEventListener('DOMContentLoaded',()=>{
+  const kbb=document.getElementById('kbb');
+  if(kbb){
+    let startX=0;
+    kbb.addEventListener('touchstart',e=>startX=e.touches[0].clientX,{passive:true});
+  }
+});
 
 // ── SESSION ────────────────────────────────────────────────────────────────
 fetch('/api/auth/me').then(r=>r.json()).then(d=>{if(d.id){CU=d;showApp();}}).catch(()=>{});
