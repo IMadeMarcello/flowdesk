@@ -428,6 +428,15 @@ body {
   font-size: 10px;
   color: var(--text-tertiary);
 }
+.role-pill {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+.role-pill.manager { background: var(--purple-glow); color: var(--purple); }
+.role-pill.teamlead { background: var(--blue-glow); color: var(--blue); }
+.role-pill.karyawan { background: var(--teal-glow); color: var(--teal); }
 .top-actions {
   display: flex;
   align-items: center;
@@ -1680,7 +1689,7 @@ body {
       <div class="user-avatar" id="tb-av"></div>
       <div class="user-details">
         <span class="user-name" id="tb-name">-</span>
-        <span class="user-role" id="tb-rb">-</span>
+        <span class="user-role" id="tb-rb" style="font-weight:600"></span>
       </div>
     </div>
     <div class="top-actions">
@@ -1917,6 +1926,12 @@ body {
 <div class="modal-overlay" id="m-chpass"><div class="modal"><div class="modal-header">Ganti Password</div><div class="input-group"><label>Password Lama</label><input type="password" id="oldPassword"></div><div class="input-group"><label>Password Baru</label><input type="password" id="newPasswordChange" placeholder="Minimal 6 karakter"></div><div class="message-box error" id="changePassError"></div><div class="modal-footer"><button class="btn-secondary" onclick="closeModal('m-chpass')">Batal</button><button class="btn-primary" onclick="submitChangePassword()"><span>Simpan</span><span class="spinner-sm" id="changePassSpinner" style="display:none"></span></button></div></div></div>
 
 <script>
+// --- Maps (harus di atas segalanya) ---
+const roleMap = { manager: 'Manager', teamlead: 'Team Lead', karyawan: 'Karyawan' };
+const priorityMap = { high: 'Tinggi', med: 'Sedang', low: 'Rendah' };
+const statusMap = { todo: 'To Do', inprogress: 'In Progress', review: 'Review', done: 'Selesai' };
+const nextLabelMap = { todo: 'Mulai', inprogress: 'Review', review: 'Selesai' };
+
 // --- Core Variables ---
 let currentUser = null;
 let allTasks = [];
@@ -2030,10 +2045,21 @@ async function initApp() {
   setAvatar(document.getElementById('bs-av'));
   document.getElementById('tb-name').textContent = currentUser.name;
   const roleMap = { manager: 'Manager', teamlead: 'Team Lead', karyawan: 'Karyawan' };
-  document.getElementById('tb-rb').textContent = roleMap[currentUser.role];
+  const roleEl = document.getElementById('tb-rb');
+  roleEl.textContent = roleMap[currentUser.role];
+  roleEl.className = `user-role role-pill ${currentUser.role}`;
   document.getElementById('bs-name').textContent = currentUser.name;
   document.getElementById('bs-role').textContent = roleMap[currentUser.role];
-  if(currentUser.role === 'manager') document.querySelectorAll('.manager-only').forEach(el => el.style.display = '');
+  // Tampilkan/sembunyikan elemen berdasarkan role
+  if(currentUser.role === 'manager') {
+    document.querySelectorAll('.manager-only').forEach(el => el.style.display = '');
+  } else {
+    // Pastikan manager-only tersembunyi untuk karyawan/teamlead
+    document.querySelectorAll('.manager-only').forEach(el => el.style.display = 'none');
+    // Sembunyikan FAB untuk non-manager
+    const fab = document.getElementById('fab');
+    if(fab) fab.style.display = 'none';
+  }
   document.getElementById('ddate').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   document.getElementById('dgreet').textContent = `${getGreeting()}, ${currentUser.name}!`;
   await loadAllData();
@@ -2148,27 +2174,50 @@ function switchTaskType(type) { currentTaskType = type; const indBtn = document.
 function renderMemberPicker() { const nonManager = allUsers.filter(u => u.role !== 'manager'); const picSelect = document.getElementById('groupPIC'); picSelect.innerHTML = nonManager.map(u => `<option value="${u.id}">${u.name} - ${roleMap[u.role]}</option>`).join(''); const picVal = parseInt(picSelect.value); const available = nonManager.filter(u => !selectedMembersSet.has(u.id)); const selected = nonManager.filter(u => selectedMembersSet.has(u.id)); document.getElementById('memberAvail').innerHTML = available.length === 0 ? '<div style="padding:12px;text-align:center;font-size:12px">Semua terpilih</div>' : available.map((u,i) => { const colors = ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b']; return `<div onclick="addMember(${u.id})" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-light)"><div style="width:28px;height:28px;border-radius:50%;background:${colors[i%4]}22;color:${colors[i%4]};display:flex;align-items:center;justify-content:center;font-size:11px">${u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div><div style="flex:1;font-size:13px">${u.name}</div><div style="color:var(--teal);font-size:16px">+</div></div>`; }).join(''); document.getElementById('memberSelected').innerHTML = selected.length === 0 ? '<div style="padding:12px;text-align:center;font-size:12px">Belum ada anggota</div>' : selected.map((u,i) => { const colors = ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b']; const isPIC = picVal === u.id; return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-glow);border-bottom:1px solid var(--border-light)"><div style="width:28px;height:28px;border-radius:50%;background:${colors[i%4]}22;color:${colors[i%4]};display:flex;align-items:center;justify-content:center;font-size:11px">${u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div><div style="flex:1;font-size:13px">${u.name}${isPIC ? ' (PIC)' : ''}</div><div onclick="removeMember(${u.id})" style="color:var(--red);cursor:pointer;font-size:16px">✕</div></div>`; }).join(''); document.getElementById('memberCount').textContent = `(${selected.length})`; }
 function addMember(uid) { selectedMembersSet.add(uid); renderMemberPicker(); }
 function removeMember(uid) { selectedMembersSet.delete(uid); renderMemberPicker(); }
-function saveNewTask() { const title = document.getElementById('taskTitle').value.trim(); if(!title) { showToast('Judul wajib diisi', 'error'); return; } setSpinner('taskSpinner', true); let promise; if(currentTaskType === 'individu') { promise = fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: document.getElementById('taskDesc').value, assignee_id: document.getElementById('taskAssignee').value, priority: document.getElementById('taskPriority').value, deadline: document.getElementById('taskDeadline').value }) }); } else { const members = Array.from(selectedMembersSet); if(members.length === 0) { showToast('Pilih minimal 1 anggota', 'error'); setSpinner('taskSpinner', false); return; } promise = fetch('/api/tasks/group', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: document.getElementById('taskDesc').value, priority: document.getElementById('taskPriority').value, deadline: document.getElementById('taskDeadline').value, group_name: document.getElementById('groupName').value || title, pic_id: document.getElementById('groupPIC').value, member_ids: members }) }); } promise.then(r => r.json()).then(res => { if(!res.error) { closeModal('m-task'); document.getElementById('taskTitle').value = ''; document.getElementById('taskDesc').value = ''; selectedMembersSet.clear(); switchTaskType('individu'); loadAllData(); showToast('Tugas berhasil ditambahkan', 'success'); } else throw new Error(res.error); }).catch(e => showToast(e.message, 'error')).finally(() => setSpinner('taskSpinner', false)); }
+function saveNewTask() {
+  if(currentUser.role !== 'manager') { showToast('Hanya manager yang bisa menambah tugas', 'error'); return; }
+  const title = document.getElementById('taskTitle').value.trim(); if(!title) { showToast('Judul wajib diisi', 'error'); return; } setSpinner('taskSpinner', true); let promise; if(currentTaskType === 'individu') { promise = fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: document.getElementById('taskDesc').value, assignee_id: document.getElementById('taskAssignee').value, priority: document.getElementById('taskPriority').value, deadline: document.getElementById('taskDeadline').value }) }); } else { const members = Array.from(selectedMembersSet); if(members.length === 0) { showToast('Pilih minimal 1 anggota', 'error'); setSpinner('taskSpinner', false); return; } promise = fetch('/api/tasks/group', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: document.getElementById('taskDesc').value, priority: document.getElementById('taskPriority').value, deadline: document.getElementById('taskDeadline').value, group_name: document.getElementById('groupName').value || title, pic_id: document.getElementById('groupPIC').value, member_ids: members }) }); } promise.then(r => r.json()).then(res => { if(!res.error) { closeModal('m-task'); document.getElementById('taskTitle').value = ''; document.getElementById('taskDesc').value = ''; selectedMembersSet.clear(); switchTaskType('individu'); loadAllData(); showToast('Tugas berhasil ditambahkan', 'success'); } else throw new Error(res.error); }).catch(e => showToast(e.message, 'error')).finally(() => setSpinner('taskSpinner', false)); }
 function submitAddUser() { const errBox = document.getElementById('addUserError'); errBox.style.display = 'none'; setSpinner('addUserSpinner', true); fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('newName').value.trim(), username: document.getElementById('newUsername').value.trim(), email: document.getElementById('newEmail').value.trim(), password: document.getElementById('newPassword').value, role: document.getElementById('newRole').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-adduser'); document.querySelectorAll('#m-adduser input').forEach(i => i.value = ''); loadAllData(); showToast('User berhasil ditambahkan', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('addUserSpinner', false)); }
 function openResetPassword(uid) { document.getElementById('resetUserId').value = uid; document.getElementById('resetPassword').value = ''; document.getElementById('resetError').style.display = 'none'; openModal('m-reset'); }
 function submitResetPassword() { const errBox = document.getElementById('resetError'); errBox.style.display = 'none'; setSpinner('resetSpinner', true); fetch(`/api/users/${document.getElementById('resetUserId').value}/reset-password`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ new_password: document.getElementById('resetPassword').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-reset'); showToast('Password berhasil direset', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('resetSpinner', false)); }
 function submitChangePassword() { const errBox = document.getElementById('changePassError'); errBox.style.display = 'none'; setSpinner('changePassSpinner', true); fetch('/api/auth/change-password', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ old_password: document.getElementById('oldPassword').value, new_password: document.getElementById('newPasswordChange').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-chpass'); document.getElementById('oldPassword').value = ''; document.getElementById('newPasswordChange').value = ''; showToast('Password berhasil diubah', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('changePassSpinner', false)); }
 function approveUser(id) { fetch(`/api/auth/pending/${id}/approve`, { method: 'POST' }).then(() => { loadAllData(); showToast('User disetujui', 'success'); }).catch(() => showToast('Gagal', 'error')); }
 function rejectUser(id, name) { if(!confirm(`Tolak pendaftaran "${name}"?`)) return; fetch(`/api/auth/pending/${id}/reject`, { method: 'POST' }).then(() => { loadAllData(); showToast('User ditolak', 'info'); }).catch(() => showToast('Gagal', 'error')); }
-function deleteUser(id, name) { if(!confirm(`Hapus user "${name}"?`)) return; fetch(`/api/users/${id}`, { method: 'DELETE' }).then(() => { loadAllData(); showToast('User dihapus', 'info'); }).catch(() => showToast('Gagal', 'error')); }
+function deleteUser(id, name) {
+  if(currentUser.role !== 'manager') { showToast('Akses ditolak', 'error'); return; }
+  if(!confirm(`Hapus user "${name}"?`)) return; fetch(`/api/users/${id}`, { method: 'DELETE' }).then(() => { loadAllData(); showToast('User dihapus', 'info'); }).catch(() => showToast('Gagal', 'error')); }
 function renderUserTable() { if(currentUser.role !== 'manager') return; document.getElementById('userTableBody').innerHTML = allUsers.map((u,i) => { const colors = ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b']; return `<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="member-avatar" style="width:32px;height:32px;background:${colors[i%4]}22;color:${colors[i%4]}">${u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>${u.name}</div></td><td>${u.username}</td><td>${u.email}</td><td><span class="status-badge" style="background:${colors[i%4]}22;color:${colors[i%4]}">${roleMap[u.role]}</span></td><td>${u.id !== currentUser.id ? `<div style="display:flex;gap:8px"><button class="btn-icon" onclick="openResetPassword(${u.id})">Reset</button><button class="btn-icon" style="border-color:var(--red);color:var(--red)" onclick="deleteUser(${u.id}, '${u.name.replace(/'/g, "\\'")}')">Hapus</button></div>` : '<span style="color:var(--text-tertiary)">Kamu</span>'}</td>`; }).join(''); }
 // --- UI Helpers ---
-function showSection(sectionName, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(`sec-${sectionName}`).classList.add('active'); if(el && el.classList) { document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); } if(sectionName === 'notif') fetchNotifications(); if(sectionName === 'activity') fetchActivityLog(); if(sectionName === 'pending') fetchPendingUsers(); if(sectionName === 'calendar') renderCalendar(); if(sectionName === 'chat') loadChatList(); if(sectionName === 'submissions') fetchSubmissions(); if(sectionName === 'users') renderUserTable(); if(sectionName === 'dashboard') { refreshCharts(); renderMemberProgress(); } const fab = document.getElementById('fab'); if(fab) fab.style.display = (sectionName === 'kanban' && currentUser && currentUser.role === 'manager') ? 'flex' : 'none'; }
+function showSection(sectionName, el) {
+  // Guard: halaman khusus manager
+  const managerOnly = ['submissions', 'pending', 'users', 'activity'];
+  if(managerOnly.includes(sectionName) && currentUser && currentUser.role !== 'manager') {
+    showToast('Akses ditolak', 'error');
+    return;
+  }
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${sectionName}`).classList.add('active');
+  if(el && el.classList) {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  if(sectionName === 'notif') fetchNotifications();
+  if(sectionName === 'activity') fetchActivityLog();
+  if(sectionName === 'pending') fetchPendingUsers();
+  if(sectionName === 'calendar') renderCalendar();
+  if(sectionName === 'chat') loadChatList();
+  if(sectionName === 'submissions') fetchSubmissions();
+  if(sectionName === 'users') renderUserTable();
+  if(sectionName === 'dashboard') { refreshCharts(); renderMemberProgress(); }
+  const fab = document.getElementById('fab');
+  if(fab) fab.style.display = (sectionName === 'kanban' && currentUser && currentUser.role === 'manager') ? 'flex' : 'none';
+}
 function mobileNavClick(section) { showSection(section, null); document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active')); document.querySelector(`.mobile-nav-item[onclick*="${section}"]`).classList.add('active'); if(section === 'chat') loadChatList(); }
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 function openBottomSheet(id) { document.getElementById(id).classList.add('active'); }
 function closeBottomSheet(id) { document.getElementById(id).classList.remove('active'); }
-// --- Maps ---
-const roleMap = { manager: 'Manager', teamlead: 'Team Lead', karyawan: 'Karyawan' };
-const priorityMap = { high: 'Tinggi', med: 'Sedang', low: 'Rendah' };
-const statusMap = { todo: 'To Do', inprogress: 'In Progress', review: 'Review', done: 'Selesai' };
-const nextLabelMap = { todo: 'Mulai', inprogress: 'Review', review: 'Selesai' };
+
 // --- Initial check ---
 fetch('/api/auth/me').then(r => r.json()).then(user => { if(user && user.id) { currentUser = user; initApp(); } }).catch(() => {});
 </script>
