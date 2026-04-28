@@ -1,4 +1,4 @@
-const express=require('express'),bcrypt=require('bcryptjs');
+const express=require('express'),bcrypt=require('bcryptjs'),crypto=require('crypto');
 const {db}=require('../database');
 const {sendMail}=require('../mailer');
 const {requireLogin,requireRole}=require('../middleware/auth');
@@ -72,9 +72,76 @@ r.patch('/update-profile',requireLogin,(req,res)=>{
   res.json({success:true,name:name.trim()});
 });
 
-r.post('/pending/:id/approve',requireRole('manager'),(req,res)=>{
+// FORGOT PASSWORD - kirim link reset
+r.post('/forgot-password',(req,res)=>{
+  const{email}=req.body;
+  if(!email)return res.status(400).json({error:'Email wajib diisi'});
   const d=db.get();
-  const pid=parseInt(req.params.id);
+  const user=d.users.find(u=>u.email===email.trim().toLowerCase());
+  // Selalu jawab sukses agar tidak bocorkan info email terdaftar
+  if(!user){
+    return res.json({success:true,message:'Jika email terdaftar, link reset akan dikirim.'});
+  }
+  // Buat token
+  const token=crypto.randomBytes(32).toString('hex');
+  const expires=Date.now()+(60*60*1000); // 1 jam
+  if(!d.reset_tokens)d.reset_tokens=[];
+  // Hapus token lama untuk user ini
+  d.reset_tokens=d.reset_tokens.filter(t=>t.user_id!==user.id);
+  d.reset_tokens.push({user_id:user.id,token,expires});
+  db.save(d);
+  // Kirim email
+  const BASE_URL=process.env.BASE_URL||`http://localhost:${process.env.PORT||3000}`;
+  const resetLink=`${BASE_URL}/reset-password?token=${token}`;
+  sendMail(user.email,'[FlowDesk] Reset Password',
+    `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+      <h2 style="color:#10b981">Reset Password FlowDesk</h2>
+      <p>Halo <b>${user.name}</b>,</p>
+      <p>Kami menerima permintaan reset password untuk akun kamu.</p>
+      <p>Klik tombol di bawah untuk reset password:</p>
+      <div style="text-align:center;margin:30px 0">
+        <a href="${resetLink}" style="background:#10b981;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">Reset Password</a>
+      </div>
+      <p style="color:#888;font-size:12px">Link ini berlaku selama <b>1 jam</b>. Abaikan email ini jika kamu tidak meminta reset password.</p>
+      <p style="color:#888;font-size:12px">Atau copy link berikut:<br><a href="${resetLink}">${resetLink}</a></p>
+    </div>`
+  );
+  res.json({success:true,message:'Jika email terdaftar, link reset akan dikirim.'});
+});
+
+// Validasi token reset
+r.get('/reset-password',(req,res)=>{
+  const{token}=req.query;
+  if(!token)return res.status(400).json({error:'Token tidak valid'});
+  const d=db.get();
+  if(!d.reset_tokens)return res.status(400).json({error:'Token tidak valid atau sudah expired'});
+  const tokenData=d.reset_tokens.find(t=>t.token===token);
+  if(!tokenData)return res.status(400).json({error:'Token tidak valid atau sudah expired'});
+  if(Date.now()>tokenData.expires)return res.status(400).json({error:'Token sudah expired. Silakan minta reset password baru.'});
+  res.json({success:true,valid:true});
+});
+
+// Submit password baru
+r.post('/reset-password',(req,res)=>{
+  const{token,new_password}=req.body;
+  if(!token||!new_password)return res.status(400).json({error:'Data tidak lengkap'});
+  if(new_password.length<6)return res.status(400).json({error:'Password minimal 6 karakter'});
+  const d=db.get();
+  if(!d.reset_tokens)return res.status(400).json({error:'Token tidak valid'});
+  const tokenData=d.reset_tokens.find(t=>t.token===token);
+  if(!tokenData)return res.status(400).json({error:'Token tidak valid atau sudah expired'});
+  if(Date.now()>tokenData.expires)return res.status(400).json({error:'Token sudah expired. Silakan minta reset password baru.'});
+  const idx=d.users.findIndex(u=>u.id===tokenData.user_id);
+  if(idx===-1)return res.status(404).json({error:'User tidak ditemukan'});
+  d.users[idx].password=bcrypt.hashSync(new_password,10);
+  // Hapus token setelah dipakai
+  d.reset_tokens=d.reset_tokens.filter(t=>t.token!==token);
+  db.save(d);
+  res.json({success:true,message:'Password berhasil direset! Silakan login.'});
+});
+
+r.post('/pending/:id/approve',requireRole('manager'),(req,res)=>{
+  const d=db.get(),pid=parseInt(req.params.id);
   const p=d.pending.find(x=>x.id===pid);
   if(!p)return res.status(404).json({error:'Tidak ditemukan'});
   const uid=db.nextId('users');
@@ -86,8 +153,7 @@ r.post('/pending/:id/approve',requireRole('manager'),(req,res)=>{
 });
 
 r.post('/pending/:id/reject',requireRole('manager'),(req,res)=>{
-  const d=db.get();
-  const pid=parseInt(req.params.id);
+  const d=db.get(),pid=parseInt(req.params.id);
   const p=d.pending.find(x=>x.id===pid);
   if(!p)return res.status(404).json({error:'Tidak ditemukan'});
   d.pending=d.pending.filter(x=>x.id!==pid);

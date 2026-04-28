@@ -24,6 +24,11 @@ app.use('/api/users',require('./routes/users'));
 app.use('/api/chat',require('./routes/chat'));
 app.use('/api',require('./routes/users'));
 
+// Halaman reset password
+app.get('/reset-password',(req,res)=>{
+  res.sendFile(path.join(__dirname,'public','reset-password.html'));
+});
+
 app.get('/{*path}',(req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
 
 app.listen(PORT,'0.0.0.0',()=>{

@@ -363,6 +363,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
       <div class="ig"><label>Password</label><input type="password" id="inp-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn-p" onclick="doLogin()"><span id="lbt">Masuk ke FlowDesk</span><span class="spn" id="lsp" style="display:none"></span></button>
       <div class="msgb err" id="lerr"></div>
+      <div style="text-align:center;margin-top:12px">
+        <span onclick="showForgotPassword()" style="font-size:13px;color:var(--tx3);cursor:pointer;text-decoration:underline">Lupa password?</span>
+      </div>
     </div>
     <div id="form-register" style="display:none">
       <div class="ig"><label>Nama Lengkap</label><input type="text" id="rn" placeholder="Nama lengkap"></div>
@@ -652,6 +655,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
     <div class="ig"><label>Password Baru</label><input type="password" id="cpnew" placeholder="Min. 6 karakter"></div>
     <div class="msgb err" id="cperr"></div>
     <div class="mft"><button class="btn-sec" onclick="closeModal('m-chpass')">Batal</button><button class="btn-p" onclick="doChpass()"><span>Simpan</span><span class="spn" id="sp-cp" style="display:none"></span></button></div>
+  </div>
+</div>
+
+<!-- MODAL: LUPA PASSWORD -->
+<div class="ovl" id="m-forgot">
+  <div class="modal">
+    <div class="mtl">🔑 Lupa Password</div>
+    <div id="forgot-step1">
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Masukkan email yang terdaftar. Kami akan mengirim link untuk reset password.</p>
+      <div class="ig"><label>Email</label><input type="email" id="forgot-email" placeholder="email@domain.com" onkeydown="if(event.key==='Enter')submitForgot()"></div>
+      <div class="msgb" id="forgot-msg" style="display:none"></div>
+      <div class="mft">
+        <button class="btn-sec" onclick="closeModal('m-forgot')">Batal</button>
+        <button class="btn-p" onclick="submitForgot()"><span id="forgot-btn-text">Kirim Link Reset</span><span class="spn" id="forgot-spn" style="display:none"></span></button>
+      </div>
+    </div>
+    <div id="forgot-step2" style="display:none;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">📧</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Email Terkirim!</div>
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Jika email terdaftar, link reset password telah dikirim. Cek inbox atau folder spam kamu.</div>
+      <div style="font-size:12px;color:var(--tx3);background:var(--bg3);padding:10px;border-radius:var(--rm);margin-bottom:16px">Link berlaku selama <b>1 jam</b></div>
+      <button class="btn-p" onclick="closeModal('m-forgot');document.getElementById('forgot-step1').style.display='block';document.getElementById('forgot-step2').style.display='none';">Tutup</button>
+    </div>
   </div>
 </div>
 
@@ -1297,6 +1323,40 @@ function doChpass(){
 }
 
 var MANAGER_PAGES=['submissions','pending','users','activity'];
+function showForgotPassword(){
+  document.getElementById('forgot-email').value='';
+  document.getElementById('forgot-msg').style.display='none';
+  document.getElementById('forgot-step1').style.display='block';
+  document.getElementById('forgot-step2').style.display='none';
+  openModal('m-forgot');
+}
+
+function submitForgot(){
+  var email=document.getElementById('forgot-email').value.trim();
+  var msg=document.getElementById('forgot-msg');
+  msg.style.display='none';
+  if(!email){msg.style.display='block';msg.className='msgb err';msg.textContent='Email wajib diisi';return;}
+  document.getElementById('forgot-btn-text').style.display='none';
+  setSp('forgot-spn',true);
+  fetch('/api/auth/forgot-password',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email})
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.success){
+      document.getElementById('forgot-step1').style.display='none';
+      document.getElementById('forgot-step2').style.display='block';
+    } else {
+      msg.style.display='block';msg.className='msgb err';msg.textContent=data.error||'Gagal';
+    }
+  }).catch(function(){
+    msg.style.display='block';msg.className='msgb err';msg.textContent='Gagal terhubung ke server';
+  }).finally(function(){
+    document.getElementById('forgot-btn-text').style.display='inline';
+    setSp('forgot-spn',false);
+  });
+}
+
 fetch('/api/auth/me').then(function(r){return r.json();}).then(function(d){if(d&&d.id){CU=d;showApp();}}).catch(function(){});
 </script>
 </body>
