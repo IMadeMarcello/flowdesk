@@ -1739,7 +1739,7 @@ body {
         <span>Notifikasi</span>
         <span class="badge" id="notif-bdg" style="display:none">0</span>
       </div>
-      <div class="sidebar-group manager-only" style="display:none">Manajemen</div>
+      <div class="sidebar-group manager-only" style="display:none;font-weight:800;color:var(--purple)">Manajemen</div>
       <div class="sidebar-item manager-only" onclick="showSection('submissions', this)" style="display:none">
         <span class="icon">📁</span>
         <span>Pengumpulan</span>
@@ -1896,10 +1896,10 @@ body {
 <div class="bottom-sheet-overlay" id="bs-more" onclick="if(event.target===this)closeBottomSheet('bs-more')">
   <div class="bottom-sheet"><div class="sheet-handle"></div><div class="sheet-item" onclick="closeBottomSheet('bs-more');showSection('tasks',null)"><span class="sheet-icon">📋</span><div><div class="sheet-label">Daftar Tugas</div></div></div>
     <div class="sheet-item" onclick="closeBottomSheet('bs-more');showSection('calendar',null)"><span class="sheet-icon">📅</span><div><div class="sheet-label">Kalender</div></div></div>
-    <div class="sheet-item manager-only" onclick="closeBottomSheet('bs-more');showSection('submissions',null)"><span class="sheet-icon">📁</span><div><div class="sheet-label">Pengumpulan</div></div></div>
-    <div class="sheet-item manager-only" onclick="closeBottomSheet('bs-more');showSection('users',null)"><span class="sheet-icon">👥</span><div><div class="sheet-label">Kelola User</div></div></div>
-    <div class="sheet-item manager-only" onclick="closeBottomSheet('bs-more');showSection('pending',null)"><span class="sheet-icon">⏳</span><div><div class="sheet-label">Permintaan</div></div></div>
-    <div class="sheet-item manager-only" onclick="closeBottomSheet('bs-more');showSection('activity',null)"><span class="sheet-icon">📜</span><div><div class="sheet-label">Log Aktivitas</div></div></div>
+    <div class="sheet-item manager-only" style="display:none" onclick="closeBottomSheet('bs-more');showSection('submissions',null)"><span class="sheet-icon">📁</span><div><div class="sheet-label">Pengumpulan</div></div></div>
+    <div class="sheet-item manager-only" style="display:none" onclick="closeBottomSheet('bs-more');showSection('users',null)"><span class="sheet-icon">👥</span><div><div class="sheet-label">Kelola User</div></div></div>
+    <div class="sheet-item manager-only" style="display:none" onclick="closeBottomSheet('bs-more');showSection('pending',null)"><span class="sheet-icon">⏳</span><div><div class="sheet-label">Permintaan</div></div></div>
+    <div class="sheet-item manager-only" style="display:none" onclick="closeBottomSheet('bs-more');showSection('activity',null)"><span class="sheet-icon">📜</span><div><div class="sheet-label">Log Aktivitas</div></div></div>
   </div>
 </div>
 
@@ -1932,6 +1932,10 @@ const priorityMap = { high: 'Tinggi', med: 'Sedang', low: 'Rendah' };
 const statusMap = { todo: 'To Do', inprogress: 'In Progress', review: 'Review', done: 'Selesai' };
 const nextLabelMap = { todo: 'Mulai', inprogress: 'Review', review: 'Selesai' };
 
+const roleMap = { manager: 'Manager', teamlead: 'Team Lead', karyawan: 'Karyawan' };
+const priorityMap = { high: 'Tinggi', med: 'Sedang', low: 'Rendah' };
+const statusMap = { todo: 'To Do', inprogress: 'In Progress', review: 'Review', done: 'Selesai' };
+const nextLabelMap = { todo: 'Mulai', inprogress: 'Review', review: 'Selesai' };
 // --- Core Variables ---
 let currentUser = null;
 let allTasks = [];
@@ -2177,12 +2181,20 @@ function removeMember(uid) { selectedMembersSet.delete(uid); renderMemberPicker(
 function saveNewTask() {
   if(currentUser.role !== 'manager') { showToast('Hanya manager yang bisa menambah tugas', 'error'); return; }
   const title = document.getElementById('taskTitle').value.trim(); if(!title) { showToast('Judul wajib diisi', 'error'); return; } setSpinner('taskSpinner', true); let promise; if(currentTaskType === 'individu') { promise = fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: document.getElementById('taskDesc').value, assignee_id: document.getElementById('taskAssignee').value, priority: document.getElementById('taskPriority').value, deadline: document.getElementById('taskDeadline').value }) }); } else { const members = Array.from(selectedMembersSet); if(members.length === 0) { showToast('Pilih minimal 1 anggota', 'error'); setSpinner('taskSpinner', false); return; } promise = fetch('/api/tasks/group', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: document.getElementById('taskDesc').value, priority: document.getElementById('taskPriority').value, deadline: document.getElementById('taskDeadline').value, group_name: document.getElementById('groupName').value || title, pic_id: document.getElementById('groupPIC').value, member_ids: members }) }); } promise.then(r => r.json()).then(res => { if(!res.error) { closeModal('m-task'); document.getElementById('taskTitle').value = ''; document.getElementById('taskDesc').value = ''; selectedMembersSet.clear(); switchTaskType('individu'); loadAllData(); showToast('Tugas berhasil ditambahkan', 'success'); } else throw new Error(res.error); }).catch(e => showToast(e.message, 'error')).finally(() => setSpinner('taskSpinner', false)); }
-function submitAddUser() { const errBox = document.getElementById('addUserError'); errBox.style.display = 'none'; setSpinner('addUserSpinner', true); fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('newName').value.trim(), username: document.getElementById('newUsername').value.trim(), email: document.getElementById('newEmail').value.trim(), password: document.getElementById('newPassword').value, role: document.getElementById('newRole').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-adduser'); document.querySelectorAll('#m-adduser input').forEach(i => i.value = ''); loadAllData(); showToast('User berhasil ditambahkan', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('addUserSpinner', false)); }
+function submitAddUser() {
+  if(currentUser.role !== 'manager') { showToast('Akses ditolak', 'error'); return; }
+  const errBox = document.getElementById('addUserError'); errBox.style.display = 'none'; setSpinner('addUserSpinner', true); fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('newName').value.trim(), username: document.getElementById('newUsername').value.trim(), email: document.getElementById('newEmail').value.trim(), password: document.getElementById('newPassword').value, role: document.getElementById('newRole').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-adduser'); document.querySelectorAll('#m-adduser input').forEach(i => i.value = ''); loadAllData(); showToast('User berhasil ditambahkan', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('addUserSpinner', false)); }
 function openResetPassword(uid) { document.getElementById('resetUserId').value = uid; document.getElementById('resetPassword').value = ''; document.getElementById('resetError').style.display = 'none'; openModal('m-reset'); }
-function submitResetPassword() { const errBox = document.getElementById('resetError'); errBox.style.display = 'none'; setSpinner('resetSpinner', true); fetch(`/api/users/${document.getElementById('resetUserId').value}/reset-password`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ new_password: document.getElementById('resetPassword').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-reset'); showToast('Password berhasil direset', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('resetSpinner', false)); }
+function submitResetPassword() {
+  if(currentUser.role !== 'manager') { showToast('Akses ditolak', 'error'); return; }
+  const errBox = document.getElementById('resetError'); errBox.style.display = 'none'; setSpinner('resetSpinner', true); fetch(`/api/users/${document.getElementById('resetUserId').value}/reset-password`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ new_password: document.getElementById('resetPassword').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-reset'); showToast('Password berhasil direset', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('resetSpinner', false)); }
 function submitChangePassword() { const errBox = document.getElementById('changePassError'); errBox.style.display = 'none'; setSpinner('changePassSpinner', true); fetch('/api/auth/change-password', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ old_password: document.getElementById('oldPassword').value, new_password: document.getElementById('newPasswordChange').value }) }).then(r => r.json().then(d => ({ ok: r.ok, data: d }))).then(res => { if(!res.ok) throw new Error(res.data.error); closeModal('m-chpass'); document.getElementById('oldPassword').value = ''; document.getElementById('newPasswordChange').value = ''; showToast('Password berhasil diubah', 'success'); }).catch(e => { errBox.style.display = 'block'; errBox.textContent = e.message; }).finally(() => setSpinner('changePassSpinner', false)); }
-function approveUser(id) { fetch(`/api/auth/pending/${id}/approve`, { method: 'POST' }).then(() => { loadAllData(); showToast('User disetujui', 'success'); }).catch(() => showToast('Gagal', 'error')); }
-function rejectUser(id, name) { if(!confirm(`Tolak pendaftaran "${name}"?`)) return; fetch(`/api/auth/pending/${id}/reject`, { method: 'POST' }).then(() => { loadAllData(); showToast('User ditolak', 'info'); }).catch(() => showToast('Gagal', 'error')); }
+function approveUser(id) {
+  if(currentUser.role !== 'manager') { showToast('Akses ditolak', 'error'); return; }
+  fetch(`/api/auth/pending/${id}/approve`, { method: 'POST' }).then(() => { loadAllData(); showToast('User disetujui', 'success'); }).catch(() => showToast('Gagal', 'error')); }
+function rejectUser(id, name) {
+  if(currentUser.role !== 'manager') { showToast('Akses ditolak', 'error'); return; }
+  if(!confirm(`Tolak pendaftaran "${name}"?`)) return; fetch(`/api/auth/pending/${id}/reject`, { method: 'POST' }).then(() => { loadAllData(); showToast('User ditolak', 'info'); }).catch(() => showToast('Gagal', 'error')); }
 function deleteUser(id, name) {
   if(currentUser.role !== 'manager') { showToast('Akses ditolak', 'error'); return; }
   if(!confirm(`Hapus user "${name}"?`)) return; fetch(`/api/users/${id}`, { method: 'DELETE' }).then(() => { loadAllData(); showToast('User dihapus', 'info'); }).catch(() => showToast('Gagal', 'error')); }
@@ -2212,7 +2224,12 @@ function showSection(sectionName, el) {
   const fab = document.getElementById('fab');
   if(fab) fab.style.display = (sectionName === 'kanban' && currentUser && currentUser.role === 'manager') ? 'flex' : 'none';
 }
-function mobileNavClick(section) { showSection(section, null); document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active')); document.querySelector(`.mobile-nav-item[onclick*="${section}"]`).classList.add('active'); if(section === 'chat') loadChatList(); }
+function mobileNavClick(section) {
+  const managerOnly = ['submissions','pending','users','activity'];
+  if(managerOnly.includes(section) && currentUser && currentUser.role !== 'manager') {
+    showToast('Akses ditolak', 'error'); return;
+  }
+  showSection(section, null); document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active')); document.querySelector(`.mobile-nav-item[onclick*="${section}"]`).classList.add('active'); if(section === 'chat') loadChatList(); }
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 function openBottomSheet(id) { document.getElementById(id).classList.add('active'); }
