@@ -2,373 +2,494 @@
 <html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=yes,viewport-fit=cover">
-<title>FlowDesk</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>FlowDesk — Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
-  --bg:#09090b;--bg2:#18181b;--bg3:#27272a;--bge:#1f1f23;
-  --bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.12);
-  --tx:#fafafa;--tx2:#a1a1aa;--tx3:#71717a;
-  --ac:#10b981;--acg:rgba(16,185,129,0.2);--ach:#059669;
-  --bl:#3b82f6;--blg:rgba(59,130,246,0.15);
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#222230;--bge:#16161f;
+  --bd:rgba(255,255,255,0.06);--bd2:rgba(255,255,255,0.1);--bd3:rgba(255,255,255,0.16);
+  --tx:#f0f0fa;--tx2:#9090a8;--tx3:#606078;
+  --ac:#5b8ff9;--acg:rgba(91,143,249,0.15);--ach:#4a7ef0;--acl:rgba(91,143,249,0.08);
+  --gr:#22c55e;--grg:rgba(34,197,94,0.15);
   --rd:#ef4444;--rdg:rgba(239,68,68,0.15);
   --or:#f59e0b;--org:rgba(245,158,11,0.15);
-  --pu:#8b5cf6;--pug:rgba(139,92,246,0.15);
+  --pu:#a855f7;--pug:rgba(168,85,247,0.15);
   --tl:#14b8a6;--tlg:rgba(20,184,166,0.15);
-  --sh:0 4px 6px -1px rgba(0,0,0,0.1);
-  --shl:0 10px 15px -3px rgba(0,0,0,0.1);
-  --r:8px;--rm:12px;--rl:16px;--rh:20px;
+  --pi:#ec4899;--pig:rgba(236,72,153,0.15);
+  --sh:0 2px 8px rgba(0,0,0,0.4);--shl:0 8px 32px rgba(0,0,0,0.6);
+  --r:6px;--rm:10px;--rl:14px;--rh:18px;
+  --sidebar:240px;--topbar:52px;
 }
 :root[data-theme="light"]{
-  --bg:#f8fafc;--bg2:#ffffff;--bg3:#f1f5f9;--bge:#ffffff;
-  --bd:rgba(0,0,0,0.06);--bd2:rgba(0,0,0,0.1);
-  --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
-  --ac:#059669;--acg:rgba(5,150,105,0.1);--ach:#047857;
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#f5f7ff;--bg4:#eceef8;--bge:#ffffff;
+  --bd:rgba(0,0,0,0.06);--bd2:rgba(0,0,0,0.1);--bd3:rgba(0,0,0,0.16);
+  --tx:#1a1a2e;--tx2:#4a4a6a;--tx3:#8a8aaa;
+  --ac:#3b72f0;--acg:rgba(59,114,240,0.12);--ach:#2a61df;--acl:rgba(59,114,240,0.06);
+  --gr:#16a34a;--grg:rgba(22,163,74,0.12);
+  --rd:#dc2626;--rdg:rgba(220,38,38,0.12);
+  --or:#d97706;--org:rgba(217,119,6,0.12);
+  --sh:0 2px 8px rgba(0,0,0,0.08);--shl:0 8px 32px rgba(0,0,0,0.12);
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh;}
-::-webkit-scrollbar{width:5px;height:5px;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:10px;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:99px;}
+
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideRight{from{transform:translateX(-16px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 /* LOADER */
-.loader{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9999;}
+.loader{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;}
 .loader.on{display:flex;}
-.loader-spin{width:40px;height:40px;border:3px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:spin 0.8s linear infinite;}
-.spn{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;margin-left:8px;}
+.loader-ring{width:44px;height:44px;border:3px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:spin 0.8s linear infinite;}
+.loader-text{font-size:13px;color:var(--tx3);}
+.spn{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;}
 
 /* TOAST */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);z-index:10000;padding:10px 20px;background:var(--bge);border:1px solid var(--bd2);border-radius:99px;font-size:13px;font-weight:500;transition:transform 0.3s ease;pointer-events:none;white-space:nowrap;box-shadow:var(--shl);}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:10000;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;white-space:nowrap;box-shadow:var(--shl);display:flex;align-items:center;gap:8px;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-.toast.error{background:var(--rd);color:white;border:none;}
-.toast.success{background:var(--ac);color:white;border:none;}
-.toast.info{background:var(--bl);color:white;border:none;}
+.toast.error{background:#ef4444;color:white;}
+.toast.success{background:#22c55e;color:white;}
+.toast.info{background:var(--ac);color:white;}
+.toast-icon{font-size:16px;}
 
-/* AUTH */
+/* ═══════════════ AUTH ═══════════════ */
 #auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:20px;}
 .auth-bg{position:fixed;inset:0;z-index:0;}
-[data-theme="dark"] .auth-bg{background:radial-gradient(circle at 10% 20%,rgba(16,185,129,0.08),transparent 70%),radial-gradient(circle at 90% 80%,rgba(59,130,246,0.08),transparent 70%),var(--bg);}
-[data-theme="light"] .auth-bg{background:radial-gradient(circle at 10% 20%,rgba(5,150,105,0.05),transparent 70%),var(--bg);}
-.auth-card{position:relative;z-index:1;background:var(--bge);border:1px solid var(--bd2);border-radius:var(--rh);padding:32px;width:100%;max-width:440px;box-shadow:var(--shl);animation:slideUp 0.4s ease;}
-.auth-logo{text-align:center;margin-bottom:28px;}
-.auth-logo h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--bl));-webkit-background-clip:text;background-clip:text;color:transparent;}
-.auth-logo p{font-size:13px;color:var(--tx3);margin-top:6px;}
-.auth-tabs{display:flex;gap:8px;background:var(--bg3);padding:4px;border-radius:99px;margin-bottom:24px;}
-.auth-tab{flex:1;text-align:center;padding:8px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;border-radius:99px;transition:all 0.2s;}
+[data-theme="dark"] .auth-bg{background:radial-gradient(ellipse 80% 80% at 20% -20%,rgba(91,143,249,0.12),transparent 60%),radial-gradient(ellipse 60% 60% at 80% 100%,rgba(168,85,247,0.08),transparent 60%),var(--bg);}
+[data-theme="light"] .auth-bg{background:radial-gradient(ellipse 80% 80% at 20% -20%,rgba(59,114,240,0.08),transparent 60%),var(--bg);}
+.auth-card{position:relative;z-index:1;background:var(--bge);border:1px solid var(--bd2);border-radius:var(--rh);padding:36px;width:100%;max-width:420px;box-shadow:var(--shl);animation:slideUp 0.4s ease;}
+.auth-brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px;}
+.auth-brand-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--ac),var(--pu));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.auth-brand h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--tx);}
+.auth-subtitle{text-align:center;font-size:13px;color:var(--tx3);margin-top:-20px;margin-bottom:24px;}
+.auth-tabs{display:flex;background:var(--bg3);padding:3px;border-radius:var(--rm);margin-bottom:20px;gap:3px;}
+.auth-tab{flex:1;text-align:center;padding:7px;font-size:13px;font-weight:600;color:var(--tx3);cursor:pointer;border-radius:7px;transition:all 0.2s;}
 .auth-tab.active{background:var(--bge);color:var(--tx);box-shadow:var(--sh);}
-.ig{margin-bottom:16px;}
-.ig label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--tx3);margin-bottom:6px;}
-.ig input,.ig select,.ig textarea{width:100%;padding:12px 14px;border:1px solid var(--bd2);border-radius:var(--rm);font-size:14px;color:var(--tx);background:var(--bg3);font-family:'Inter',sans-serif;outline:none;transition:all 0.2s;}
-.ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acg);}
+.ig{margin-bottom:14px;}
+.ig label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:var(--tx3);margin-bottom:5px;}
+.ig input,.ig select,.ig textarea{width:100%;padding:10px 12px;border:1px solid var(--bd2);border-radius:var(--rm);font-size:13px;color:var(--tx);background:var(--bg3);font-family:'Inter',sans-serif;outline:none;transition:all 0.2s;}
+.ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acg);background:var(--bg2);}
+.ig textarea{resize:vertical;min-height:70px;}
+.ig select option{background:var(--bg3);}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.btn-p{width:100%;padding:12px;background:var(--ac);color:white;border:none;border-radius:var(--rm);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-p{width:100%;padding:10px;background:var(--ac);color:white;border:none;border-radius:var(--rm);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-p:hover{background:var(--ach);transform:translateY(-1px);}
-.btn-o{background:transparent;border:1px solid var(--ac);color:var(--ac);}
+.btn-o{background:transparent;border:1.5px solid var(--ac);color:var(--ac);}
 .btn-o:hover{background:var(--acg);}
-.msgb{font-size:12px;margin-top:12px;padding:10px;border-radius:var(--r);display:none;}
+.msgb{font-size:12px;margin-top:10px;padding:10px 12px;border-radius:var(--r);display:none;}
 .msgb.err{background:var(--rdg);color:var(--rd);display:block;}
-.msgb.ok{background:var(--acg);color:var(--ac);display:block;}
-.th-btn{position:fixed;top:20px;right:20px;z-index:100;width:40px;height:40px;background:var(--bge);border:1px solid var(--bd2);border-radius:99px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;backdrop-filter:blur(8px);}
+.msgb.ok{background:var(--grg);color:var(--gr);display:block;}
+.forgot-link{text-align:center;margin-top:12px;}
+.forgot-link span{font-size:12px;color:var(--tx3);cursor:pointer;transition:color 0.2s;}
+.forgot-link span:hover{color:var(--ac);}
+.th-float{position:fixed;top:16px;right:16px;z-index:100;width:36px;height:36px;background:var(--bge);border:1px solid var(--bd2);border-radius:99px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;backdrop-filter:blur(8px);}
 
-/* APP */
-#app-page{display:none;min-height:100vh;background:var(--bg);}
+/* ═══════════════ APP LAYOUT ═══════════════ */
+#app-page{display:none;height:100vh;overflow:hidden;background:var(--bg);}
 
 /* TOPBAR */
-.topbar{background:var(--bge);border-bottom:1px solid var(--bd);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.brand{display:flex;align-items:center;gap:8px;}
-.brand-dot{width:8px;height:8px;background:var(--ac);border-radius:50%;}
-.brand h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--bl));-webkit-background-clip:text;background-clip:text;color:transparent;}
-.user-pill{display:flex;align-items:center;gap:10px;background:var(--bg3);padding:6px 14px 6px 6px;border-radius:99px;}
-.uav{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
-.uname{font-size:13px;font-weight:600;}
-.urole{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;margin-left:4px;}
-.urole.manager{background:var(--pug);color:var(--pu);}
-.urole.teamlead{background:var(--blg);color:var(--bl);}
-.urole.karyawan{background:var(--tlg);color:var(--tl);}
-.tb-actions{display:flex;gap:8px;}
-.tb-btn{padding:6px 14px;background:transparent;border:1px solid var(--bd2);border-radius:99px;font-size:12px;cursor:pointer;color:var(--tx2);transition:all 0.2s;}
-.tb-btn:hover{border-color:var(--ac);color:var(--ac);}
+.topbar{height:var(--topbar);background:var(--bge);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 16px 0 0;gap:0;position:relative;z-index:50;flex-shrink:0;}
+.topbar-left{width:var(--sidebar);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;border-right:1px solid var(--bd);}
+.brand-logo{width:28px;height:28px;background:linear-gradient(135deg,var(--ac),var(--pu));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:var(--tx);}
+.topbar-center{flex:1;display:flex;align-items:center;padding:0 16px;gap:8px;}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--tx3);}
+.breadcrumb-sep{color:var(--tx3);}
+.breadcrumb-current{font-weight:600;color:var(--tx);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.tb-notif{position:relative;width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:16px;transition:all 0.15s;}
+.tb-notif:hover{background:var(--bg3);color:var(--tx);}
+.tb-notif-badge{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--rd);border-radius:50%;border:2px solid var(--bge);display:none;}
+.tb-notif-badge.on{display:block;}
+.tb-sep{width:1px;height:20px;background:var(--bd2);}
+.tb-theme{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:15px;transition:all 0.15s;border:none;background:transparent;}
+.tb-theme:hover{background:var(--bg3);}
+.tb-user{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:var(--rm);cursor:pointer;transition:all 0.15s;}
+.tb-user:hover{background:var(--bg3);}
+.tb-avatar{width:28px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.tb-uname{font-size:13px;font-weight:600;}
+.tb-urole{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;letter-spacing:0.3px;}
+.tb-urole.manager{background:var(--pug);color:var(--pu);}
+.tb-urole.teamlead{background:var(--acg);color:var(--ac);}
+.tb-urole.karyawan{background:var(--grg);color:var(--gr);}
 
-/* MOBILE HEADER */
-.mob-hdr{display:none;background:var(--bge);padding:12px 16px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--bd);}
-.mob-brand{display:flex;align-items:center;gap:8px;}
-.mob-brand h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--bl));-webkit-background-clip:text;background-clip:text;color:transparent;}
-.mob-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer;border:2px solid var(--bd2);}
-
-/* APP BODY */
-.app-body{display:flex;min-height:calc(100vh - 64px);}
+/* MAIN LAYOUT */
+.app-main{display:flex;height:calc(100vh - var(--topbar));overflow:hidden;}
 
 /* SIDEBAR */
-.sidebar{width:260px;background:var(--bge);border-right:1px solid var(--bd);padding:20px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;flex-shrink:0;}
-.sg{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--tx3);padding:12px 12px 6px;}
-.si{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--rm);cursor:pointer;color:var(--tx2);font-size:13px;font-weight:500;transition:all 0.15s;}
-.si:hover{background:var(--bg3);color:var(--tx);}
-.si.active{background:var(--acg);color:var(--ac);}
-.si .ico{font-size:18px;width:24px;text-align:center;}
-.si .lbl{flex:1;}
-.si-badge{font-size:10px;background:var(--rd);color:white;border-radius:99px;padding:2px 8px;font-weight:700;}
-.si-badge.amber{background:var(--or);}
+.sidebar{width:var(--sidebar);background:var(--bge);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px;}
+.nav-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--tx3);padding:12px 10px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r);cursor:pointer;color:var(--tx2);font-size:13px;font-weight:500;transition:all 0.15s;position:relative;}
+.nav-item:hover{background:var(--bg3);color:var(--tx);}
+.nav-item.active{background:var(--acl);color:var(--ac);font-weight:600;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;background:var(--ac);border-radius:0 3px 3px 0;}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-label{flex:1;}
+.nav-badge{font-size:10px;background:var(--rd);color:white;border-radius:99px;padding:1px 6px;font-weight:700;min-width:18px;text-align:center;}
+.nav-badge.amber{background:var(--or);}
+.nav-badge.blue{background:var(--ac);}
+.sidebar-footer{padding:8px;border-top:1px solid var(--bd);}
+.sidebar-footer-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r);cursor:pointer;color:var(--tx2);font-size:13px;font-weight:500;transition:all 0.15s;}
+.sidebar-footer-item:hover{background:var(--bg3);color:var(--tx);}
 
 /* CONTENT */
-.content{flex:1;overflow-y:auto;padding:24px 28px;}
-.sec{display:none;animation:fadeIn 0.3s ease;}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;}
+.content-inner{padding:24px;}
+.sec{display:none;animation:fadeIn 0.2s ease;}
 .sec.on{display:block;}
-.seh{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
-.set{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;letter-spacing:-0.3px;}
-.ses{font-size:13px;color:var(--tx3);margin-top:4px;}
+
+/* PAGE HEADER */
+.page-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+.page-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:var(--tx);letter-spacing:-0.3px;}
+.page-sub{font-size:12px;color:var(--tx3);margin-top:3px;}
+.page-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px;border:none;}
+.btn-primary{background:var(--ac);color:white;}
+.btn-primary:hover{background:var(--ach);}
+.btn-secondary{background:transparent;border:1px solid var(--bd2);color:var(--tx2);}
+.btn-secondary:hover{background:var(--bg3);color:var(--tx);}
+.btn-danger{background:var(--rd);color:white;}
+.btn-danger:hover{opacity:0.9;}
+.btn-ghost{background:transparent;color:var(--tx2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--tx);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:10px;}
 
 /* STATS */
-.sg4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
-.sc{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:18px;position:relative;overflow:hidden;transition:all 0.2s;}
-.sc:hover{transform:translateY(-2px);box-shadow:var(--shl);}
-.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.sc.blue::before{background:var(--bl);}
-.sc.green::before{background:var(--ac);}
-.sc.orange::before{background:var(--or);}
-.sc.red::before{background:var(--rd);}
-.sc-icon{font-size:24px;margin-bottom:12px;}
-.sc-label{font-size:11px;text-transform:uppercase;font-weight:600;color:var(--tx3);letter-spacing:0.5px;}
-.sc-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;line-height:1.2;}
-.sc-sub{font-size:11px;color:var(--tx3);margin-top:8px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;position:relative;overflow:hidden;transition:all 0.2s;cursor:default;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shl);}
+.stat-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.stat-icon{width:36px;height:36px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.stat-trend{font-size:11px;font-weight:600;padding:3px 7px;border-radius:99px;}
+.stat-trend.up{background:var(--grg);color:var(--gr);}
+.stat-trend.down{background:var(--rdg);color:var(--rd);}
+.stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:var(--tx);line-height:1;}
+.stat-label{font-size:12px;color:var(--tx3);margin-top:4px;}
+.stat-bar{height:3px;border-radius:99px;margin-top:12px;background:var(--bg3);overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:99px;}
 
 /* CHARTS */
-.cg2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;}
-.cc{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:18px;}
-.ct{font-weight:700;margin-bottom:16px;font-size:14px;}
-.cw{height:180px;position:relative;}
-.mbc{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:18px;}
-.mr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd);}
-.mr:last-child{border-bottom:none;}
-.mav{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
-.pb{height:5px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-top:4px;}
-.pf{height:100%;border-radius:99px;transition:width 0.3s ease;}
+.charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-bottom:16px;}
+.chart-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;}
+.card-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title-badge{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600;}
+.chart-wrap{height:170px;position:relative;}
+.team-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;margin-bottom:14px;}
+.team-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd);}
+.team-row:last-child{border-bottom:none;}
+.team-av{width:34px;height:34px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.team-info{flex:1;min-width:0;}
+.team-name{font-size:13px;font-weight:600;color:var(--tx);}
+.team-role{font-size:10px;color:var(--tx3);}
+.team-progress{width:120px;}
+.team-pct{display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-bottom:4px;}
+.progress-bg{height:4px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:99px;}
+.team-stat{font-size:11px;font-weight:600;color:var(--tx2);min-width:50px;text-align:right;}
 
 /* KANBAN */
-.kbt{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.btn-add{padding:8px 20px;background:var(--ac);color:white;border:none;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.btn-add:hover{background:var(--ach);}
-.kbb{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start;}
-.kbc{background:var(--bg3);border-radius:var(--rl);padding:12px;min-height:500px;}
-.kbch{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--bd);}
-.col-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;text-transform:uppercase;}
-.col-dot{width:8px;height:8px;border-radius:50%;}
-.col-cnt{font-size:11px;background:var(--bge);padding:2px 8px;border-radius:99px;}
-.tcard{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rm);padding:12px;margin-bottom:8px;cursor:grab;transition:all 0.2s;}
-.tcard:hover{transform:translateY(-2px);box-shadow:var(--sh);}
-.tcard.dragging{opacity:0.4;}
-.tbadge{font-size:10px;padding:3px 8px;border-radius:99px;display:inline-block;margin-bottom:8px;}
-.tbadge.grp{background:var(--pug);color:var(--pu);}
-.tbadge.ind{background:var(--blg);color:var(--bl);}
-.ttl{font-size:13px;font-weight:600;margin-bottom:8px;}
-.tmt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-.ptag{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600;}
-.ptag.high{background:var(--rdg);color:var(--rd);}
-.ptag.med{background:var(--org);color:var(--or);}
-.ptag.low{background:var(--tlg);color:var(--tl);}
-.tdl{font-size:10px;color:var(--tx3);}
-.tdl.ov{color:var(--rd);font-weight:600;}
-.tass{font-size:10px;color:var(--tx3);background:var(--bg3);padding:3px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;margin-bottom:6px;}
-.tact{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--bd);}
-.tbtn{flex:1;text-align:center;padding:5px;font-size:10px;background:transparent;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;color:var(--tx2);transition:all 0.15s;}
-.tbtn:hover{background:var(--bg3);}
-.tbtn.go{border-color:var(--tlg);color:var(--tl);}
-.tbtn.rv{border-color:var(--org);color:var(--or);}
-.tbtn.pr{border-color:var(--blg);color:var(--bl);}
-.dz{margin-top:8px;padding:12px;border:2px dashed var(--bd2);border-radius:var(--rm);text-align:center;font-size:11px;color:var(--tx3);transition:all 0.15s;}
-.dz.over{border-color:var(--ac);background:var(--acg);color:var(--ac);}
+.kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start;}
+.kanban-col{background:var(--bg3);border-radius:var(--rl);padding:10px;min-height:400px;}
+.kanban-col-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:4px 2px;}
+.col-dot-wrap{display:flex;align-items:center;gap:7px;}
+.col-dot{width:7px;height:7px;border-radius:50%;}
+.col-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--tx2);}
+.col-badge{font-size:11px;background:var(--bg4);color:var(--tx3);border-radius:99px;padding:2px 8px;font-weight:600;}
+.task-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rm);padding:11px;margin-bottom:7px;cursor:grab;transition:all 0.2s;animation:slideUp 0.2s ease;}
+.task-card:hover{border-color:var(--bd2);box-shadow:var(--sh);}
+.task-card:active{cursor:grabbing;}
+.task-card.dragging{opacity:0.3;transform:rotate(2deg);}
+.task-type-badge{font-size:10px;padding:2px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;font-weight:600;}
+.task-type-badge.grp{background:var(--pug);color:var(--pu);}
+.task-type-badge.ind{background:var(--acg);color:var(--ac);}
+.task-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:8px;line-height:1.4;}
+.task-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
+.priority-pill{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;}
+.priority-pill.high{background:var(--rdg);color:var(--rd);}
+.priority-pill.med{background:var(--org);color:var(--or);}
+.priority-pill.low{background:var(--tlg);color:var(--tl);}
+.deadline-tag{font-size:10px;color:var(--tx3);display:flex;align-items:center;gap:3px;margin-left:auto;}
+.deadline-tag.ov{color:var(--rd);font-weight:600;}
+.task-assignee{font-size:11px;color:var(--tx3);display:flex;align-items:center;gap:5px;margin-bottom:8px;}
+.task-assignee-av{width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;}
+.task-footer{display:flex;gap:5px;padding-top:8px;border-top:1px solid var(--bd);}
+.task-btn{flex:1;text-align:center;padding:5px;font-size:10px;background:transparent;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;color:var(--tx2);transition:all 0.15s;font-weight:500;}
+.task-btn:hover{background:var(--bg3);}
+.task-btn.go{border-color:var(--tlg);color:var(--tl);}
+.task-btn.go:hover{background:var(--tlg);}
+.task-btn.rv{border-color:var(--org);color:var(--or);}
+.task-btn.rv:hover{background:var(--org);}
+.task-btn.pr{border-color:var(--acg);color:var(--ac);}
+.task-btn.pr:hover{background:var(--acg);}
+.dropzone{margin-top:6px;padding:12px;border:1.5px dashed var(--bd2);border-radius:var(--rm);text-align:center;font-size:11px;color:var(--tx3);transition:all 0.15s;}
+.dropzone.over{border-color:var(--ac);background:var(--acl);color:var(--ac);}
 
 /* TABLE */
-.fbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
-.fi{padding:10px 14px;border:1px solid var(--bd2);border-radius:var(--rm);background:var(--bg3);color:var(--tx);font-size:13px;flex:1;min-width:160px;outline:none;transition:all 0.2s;}
-.fi:focus{border-color:var(--ac);}
-.dtb{width:100%;border-collapse:collapse;background:var(--bge);border-radius:var(--rl);overflow:hidden;border:1px solid var(--bd);}
-.dtb th{text-align:left;padding:14px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--tx3);background:var(--bg3);border-bottom:1px solid var(--bd);}
-.dtb td{padding:12px 16px;font-size:12px;border-bottom:1px solid var(--bd);color:var(--tx2);}
-.dtb tr:last-child td{border-bottom:none;}
-.dtb tr:hover td{background:var(--bg3);}
-.sbdg{font-size:10px;padding:4px 10px;border-radius:99px;font-weight:600;display:inline-block;}
-.sbdg.todo{background:var(--bg3);color:var(--tx2);}
-.sbdg.inprogress{background:var(--blg);color:var(--bl);}
-.sbdg.review{background:var(--org);color:var(--or);}
-.sbdg.done{background:var(--tlg);color:var(--tl);}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.fi{padding:8px 12px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--bg3);color:var(--tx);font-size:13px;outline:none;transition:all 0.15s;font-family:'Inter',sans-serif;}
+.fi:focus{border-color:var(--ac);background:var(--bge);}
+.data-table{width:100%;border-collapse:collapse;background:var(--bge);border-radius:var(--rl);overflow:hidden;border:1px solid var(--bd);}
+.data-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--tx3);background:var(--bg3);border-bottom:1px solid var(--bd);}
+.data-table td{padding:11px 14px;font-size:12px;border-bottom:1px solid var(--bd);color:var(--tx2);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--bg3);}
+.status-chip{font-size:10px;padding:3px 9px;border-radius:4px;font-weight:600;display:inline-block;}
+.status-chip.todo{background:var(--bg4);color:var(--tx3);}
+.status-chip.inprogress{background:var(--acg);color:var(--ac);}
+.status-chip.review{background:var(--org);color:var(--or);}
+.status-chip.done{background:var(--grg);color:var(--gr);}
 
 /* CALENDAR */
-.cal-wrap{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
-.calcard{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;}
-.calh{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.calnav{padding:6px 12px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;font-size:14px;transition:all 0.15s;}
-.calnav:hover{border-color:var(--ac);color:var(--ac);}
-.calm{font-weight:700;font-size:16px;}
-.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.cdh{text-align:center;font-size:10px;font-weight:700;color:var(--tx3);padding:8px 0;}
-.cd{text-align:center;padding:8px 4px;border-radius:var(--r);font-size:12px;cursor:pointer;}
-.cd.today{background:var(--acg);color:var(--ac);font-weight:700;}
-.cd.dl{position:relative;}
-.cd.dl::after{content:'';width:4px;height:4px;background:var(--rd);border-radius:50%;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);}
+.cal-layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start;}
+.cal-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-nav{width:28px;height:28px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:14px;transition:all 0.15s;border:1px solid var(--bd2);background:transparent;}
+.cal-nav:hover{border-color:var(--ac);color:var(--ac);}
+.cal-month{font-size:14px;font-weight:700;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-dh{text-align:center;font-size:10px;font-weight:700;color:var(--tx3);padding:5px 0;}
+.cal-d{text-align:center;padding:6px 2px;border-radius:var(--r);font-size:12px;cursor:pointer;transition:all 0.15s;min-height:28px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;}
+.cal-d:hover{background:var(--bg3);}
+.cal-d.today{background:var(--acg);color:var(--ac);font-weight:700;}
+.cal-d.dl::after{content:'';width:4px;height:4px;background:var(--rd);border-radius:50%;display:block;}
+.cal-d.om{opacity:0.3;}
 .upc-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;}
-.upc-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--rm);margin-bottom:8px;transition:all 0.15s;}
-.upc-item:hover{background:var(--bg3);}
-.upc-date{width:50px;text-align:center;}
+.upc-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--rm);margin-bottom:6px;transition:all 0.15s;border:1px solid transparent;}
+.upc-item:hover{background:var(--bg3);border-color:var(--bd);}
+.upc-date-box{width:44px;text-align:center;flex-shrink:0;}
 .upc-day{font-size:20px;font-weight:800;line-height:1;}
 .upc-mon{font-size:10px;color:var(--tx3);}
+.upc-diff{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;}
 
-/* CHAT */
-.chat-wrap{display:grid;grid-template-columns:280px 1fr;background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;height:70vh;}
-.chat-left{border-right:1px solid var(--bd);display:flex;flex-direction:column;}
-.chat-search{padding:12px;border-bottom:1px solid var(--bd);}
-.chat-search input{width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--bd2);border-radius:99px;font-size:12px;color:var(--tx);outline:none;}
-.chat-tabs{display:flex;padding:8px;gap:8px;border-bottom:1px solid var(--bd);}
-.ctab{flex:1;text-align:center;padding:6px;font-size:12px;font-weight:600;background:transparent;border:none;border-radius:99px;cursor:pointer;color:var(--tx2);}
+/* ═══════════════ CHAT ═══════════════ */
+.chat-layout{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - var(--topbar) - 48px);background:var(--bge);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;}
+.chat-sidebar{border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--bg2);}
+.chat-sidebar-hdr{padding:14px 14px 10px;border-bottom:1px solid var(--bd);}
+.chat-sidebar-title{font-size:14px;font-weight:700;margin-bottom:10px;}
+.chat-search-wrap{position:relative;}
+.chat-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:13px;}
+.chat-search{width:100%;padding:7px 10px 7px 30px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;color:var(--tx);outline:none;transition:all 0.15s;}
+.chat-search:focus{border-color:var(--ac);}
+.chat-tabs{display:flex;padding:8px;gap:4px;border-bottom:1px solid var(--bd);}
+.ctab{flex:1;text-align:center;padding:5px;font-size:12px;font-weight:600;background:transparent;border:none;border-radius:var(--r);cursor:pointer;color:var(--tx3);transition:all 0.15s;}
 .ctab.on{background:var(--acg);color:var(--ac);}
-.clist{flex:1;overflow-y:auto;}
-.ci{display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;transition:all 0.12s;border-bottom:1px solid var(--bd);}
-.ci:hover{background:var(--bg3);}
-.ci.on{background:var(--acg);}
-.ci-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
-.ci-info{flex:1;}
-.ci-name{font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;}
-.ci-sub{font-size:11px;color:var(--tx3);}
-.ci-bdg{background:var(--ac);color:white;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;}
-.ci-bdg.on{display:flex;}
-.chat-main{display:flex;flex-direction:column;}
-.chat-hdr{padding:14px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;}
-.chat-hdr-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
-.chat-hdr-name{font-size:14px;font-weight:700;}
-.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--bg);}
-.msg-date{text-align:center;font-size:10px;color:var(--tx3);margin:8px 0;}
-.msg{max-width:75%;display:flex;flex-direction:column;}
-.msg.me{align-self:flex-end;}
-.msg.you{align-self:flex-start;}
-.msg-sender{font-size:10px;font-weight:600;color:var(--bl);margin-bottom:2px;}
-.msg-bubble{padding:8px 14px;border-radius:18px;font-size:13px;word-break:break-word;}
-.msg.me .msg-bubble{background:var(--ac);color:white;border-radius:18px 18px 4px 18px;}
-.msg.you .msg-bubble{background:var(--bg3);border:1px solid var(--bd2);border-radius:18px 18px 18px 4px;}
-.msg-time{font-size:9px;color:var(--tx3);margin-top:2px;}
-.chat-inp-wrap{padding:12px 16px;border-top:1px solid var(--bd);display:flex;gap:8px;align-items:flex-end;}
-.chat-inp{flex:1;padding:10px 14px;border:1px solid var(--bd2);border-radius:99px;background:var(--bg3);color:var(--tx);font-size:13px;resize:none;font-family:'Inter',sans-serif;max-height:80px;outline:none;}
-.chat-inp:focus{border-color:var(--ac);}
-.chat-send{width:38px;height:38px;background:var(--ac);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;}
-.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--tx3);gap:12px;}
+.chat-list{flex:1;overflow-y:auto;}
+.chat-contact{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:all 0.12s;border-bottom:1px solid var(--bd);}
+.chat-contact:hover{background:var(--bg3);}
+.chat-contact.on{background:var(--acl);border-left:3px solid var(--ac);}
+.chat-contact-av{width:38px;height:38px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;position:relative;}
+.online-dot{position:absolute;bottom:0;right:0;width:10px;height:10px;background:var(--gr);border-radius:50%;border:2px solid var(--bg2);}
+.chat-contact-info{flex:1;min-width:0;}
+.chat-contact-name{font-size:13px;font-weight:600;color:var(--tx);display:flex;justify-content:space-between;align-items:center;}
+.chat-contact-preview{font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.chat-unread-badge{background:var(--ac);color:white;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:99px;display:none;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0;}
+.chat-unread-badge.on{display:flex;}
 
-/* SUBMISSION */
-.sub-item{display:flex;gap:10px;padding-bottom:14px;position:relative;}
-.sub-item:not(:last-child)::before{content:'';position:absolute;left:13px;top:28px;bottom:0;width:1px;background:var(--bd2);}
-.sub-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:2px solid var(--bd);}
-.sub-icon.inprogress{background:var(--blg);border-color:var(--bl);}
-.sub-icon.review{background:var(--org);border-color:var(--or);}
-.sub-icon.done{background:var(--tlg);border-color:var(--tl);}
-.sub-body{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rm);padding:10px 12px;}
+/* CHAT MAIN */
+.chat-main{display:flex;flex-direction:column;background:var(--bg);}
+.chat-main-hdr{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;background:var(--bge);flex-shrink:0;}
+.chat-main-back{display:none;background:none;border:none;color:var(--tx2);font-size:18px;cursor:pointer;padding:4px;}
+.chat-main-av{width:36px;height:36px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.chat-main-name{font-size:14px;font-weight:700;}
+.chat-main-sub{font-size:11px;color:var(--tx3);}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:6px;}
+.chat-date-sep{text-align:center;font-size:10px;color:var(--tx3);padding:8px 0;position:relative;}
+.chat-date-sep::before,.chat-date-sep::after{content:'';position:absolute;top:50%;height:1px;background:var(--bd);width:calc(50% - 50px);}
+.chat-date-sep::before{left:0;}
+.chat-date-sep::after{right:0;}
+.msg{display:flex;flex-direction:column;max-width:72%;animation:slideUp 0.15s ease;}
+.msg.me{align-self:flex-end;align-items:flex-end;}
+.msg.you{align-self:flex-start;align-items:flex-start;}
+.msg-sender-name{font-size:10px;font-weight:600;color:var(--ac);margin-bottom:3px;}
+.msg-bubble{padding:8px 13px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word;position:relative;}
+.msg.me .msg-bubble{background:var(--ac);color:white;border-radius:14px 14px 4px 14px;}
+.msg.you .msg-bubble{background:var(--bge);border:1px solid var(--bd2);color:var(--tx);border-radius:14px 14px 14px 4px;}
+.msg-meta{display:flex;align-items:center;gap:5px;margin-top:3px;}
+.msg-time{font-size:10px;color:var(--tx3);}
+.msg-read{font-size:11px;color:var(--ac);}
+.msg-read.unread{color:var(--tx3);}
+
+/* TYPING INDICATOR */
+.typing-indicator{display:none;align-items:center;gap:10px;padding:6px 0;}
+.typing-indicator.on{display:flex;}
+.typing-av{width:28px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.typing-bubble{background:var(--bge);border:1px solid var(--bd2);border-radius:14px 14px 14px 4px;padding:8px 14px;display:flex;gap:4px;align-items:center;}
+.typing-dot{width:7px;height:7px;background:var(--tx3);border-radius:50%;animation:bounce 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:0.2s;}
+.typing-dot:nth-child(3){animation-delay:0.4s;}
+.typing-name{font-size:11px;color:var(--tx3);}
+
+/* CHAT INPUT */
+.chat-input-area{padding:12px 16px;border-top:1px solid var(--bd);background:var(--bge);flex-shrink:0;}
+.chat-input-wrap{display:flex;gap:8px;align-items:flex-end;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--rm);padding:8px 8px 8px 14px;transition:all 0.2s;}
+.chat-input-wrap:focus-within{border-color:var(--ac);}
+.chat-inp{flex:1;background:transparent;border:none;font-size:13px;color:var(--tx);font-family:'Inter',sans-serif;outline:none;resize:none;max-height:100px;line-height:1.5;}
+.chat-send{width:34px;height:34px;background:var(--ac);border:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;transition:all 0.15s;flex-shrink:0;}
+.chat-send:hover{background:var(--ach);}
+.chat-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--tx3);gap:12px;}
+.chat-empty-icon{font-size:48px;opacity:0.3;}
 
 /* NOTIF */
-.ni{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rm);padding:12px 16px;display:flex;gap:12px;margin-bottom:8px;}
-.ni.unr{border-left:3px solid var(--bl);}
-.ni-dot{width:8px;height:8px;background:var(--bl);border-radius:50%;flex-shrink:0;margin-top:5px;}
+.notif-item{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rm);padding:12px 14px;display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;transition:all 0.15s;}
+.notif-item:hover{border-color:var(--bd2);}
+.notif-item.unread{border-left:3px solid var(--ac);}
+.notif-icon-wrap{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.notif-dot{width:7px;height:7px;background:var(--ac);border-radius:50%;flex-shrink:0;margin-top:5px;}
 
 /* PENDING */
-.pc{background:var(--bge);border:1px solid var(--org);border-radius:var(--rm);padding:14px;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
-.pav{width:38px;height:38px;border-radius:50%;background:var(--org);color:var(--or);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.pending-card{background:var(--bge);border:1px solid var(--bd);border-radius:var(--rm);padding:14px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:all 0.15s;}
+.pending-card:hover{border-color:var(--or);}
+.pending-av{width:40px;height:40px;border-radius:99px;background:var(--org);color:var(--or);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+
+/* SUBMISSION */
+.sub-timeline{display:flex;flex-direction:column;gap:0;}
+.sub-item{display:flex;gap:12px;padding-bottom:16px;position:relative;}
+.sub-item:not(:last-child)::before{content:'';position:absolute;left:14px;top:30px;bottom:0;width:1px;background:var(--bd2);}
+.sub-icon{width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;border:2px solid var(--bd);}
+.sub-icon.inprogress{background:var(--acg);border-color:var(--ac);}
+.sub-icon.review{background:var(--org);border-color:var(--or);}
+.sub-icon.done{background:var(--grg);border-color:var(--gr);}
+.sub-body{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rm);padding:10px 12px;}
+.sub-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.sub-name{font-size:12px;font-weight:700;}
+.sub-time{font-size:10px;color:var(--tx3);}
+.sub-change{font-size:10px;color:var(--tx3);margin-bottom:4px;}
+.sub-note{font-size:12px;color:var(--tx2);margin-bottom:6px;}
+.sub-file-link{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--acg);border-radius:var(--r);font-size:11px;color:var(--ac);text-decoration:none;font-weight:600;}
 
 /* MODALS */
-.ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;}
+.ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;}
 .ovl.on{display:flex;animation:fadeIn 0.15s ease;}
-.modal{background:var(--bge);border:1px solid var(--bd2);border-radius:var(--rh);width:90%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px;animation:slideUp 0.2s ease;}
-.modal-lg{max-width:700px;}
-.mtl{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px;}
-.mft{display:flex;justify-content:flex-end;gap:12px;margin-top:24px;}
-.btn-sec{padding:8px 16px;background:transparent;border:1px solid var(--bd2);border-radius:var(--rm);cursor:pointer;color:var(--tx2);transition:all 0.15s;}
-.btn-sec:hover{background:var(--bg3);}
-.btn-dng{background:var(--rd);color:white;border:none;padding:8px 16px;border-radius:var(--rm);cursor:pointer;}
-.abtn{padding:4px 10px;border:1px solid var(--bd2);border-radius:var(--r);background:transparent;font-size:11px;cursor:pointer;color:var(--tx2);transition:all 0.15s;}
-.abtn:hover{border-color:var(--bl);color:var(--bl);}
-.abtn.d:hover{border-color:var(--rd);color:var(--rd);}
-.abtn.s:hover{border-color:var(--tl);color:var(--tl);}
-.al{padding:12px 16px;border-left:2px solid var(--bd2);margin-bottom:8px;background:var(--bge);border-radius:0 var(--rm) var(--rm) 0;}
-.al.info{border-left-color:var(--bl);}
-.al.success{border-left-color:var(--tl);}
-.empty{text-align:center;padding:3rem;color:var(--tx3);}
-.empty-ico{font-size:40px;margin-bottom:12px;display:block;}
-.ua{border:2px dashed var(--bd2);border-radius:var(--rm);padding:20px;text-align:center;cursor:pointer;transition:all 0.15s;}
-.ua:hover{border-color:var(--ac);background:var(--acg);}
-.up-prev{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--bg3);padding:8px 12px;border-radius:var(--rm);font-size:12px;}
+.modal{background:var(--bge);border:1px solid var(--bd2);border-radius:var(--rh);padding:24px;width:90%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp 0.2s ease;box-shadow:var(--shl);}
+.modal-lg{max-width:640px;}
+.modal-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--bd);}
+.activity-item{padding:11px 14px;border-left:2px solid var(--bd2);margin-bottom:8px;background:var(--bge);border-radius:0 var(--rm) var(--rm) 0;transition:all 0.15s;}
+.activity-item:hover{background:var(--bg3);}
+.activity-item.info{border-left-color:var(--ac);}
+.activity-item.success{border-left-color:var(--gr);}
+.activity-item.warning{border-left-color:var(--or);}
+.activity-item.danger{border-left-color:var(--rd);}
+.empty-state{text-align:center;padding:3rem;color:var(--tx3);}
+.empty-icon{font-size:40px;margin-bottom:12px;display:block;opacity:0.4;}
+.upload-area{border:2px dashed var(--bd2);border-radius:var(--rm);padding:20px;text-align:center;cursor:pointer;transition:all 0.15s;position:relative;}
+.upload-area:hover{border-color:var(--ac);background:var(--acl);}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.file-preview{display:flex;align-items:center;gap:8px;margin-top:10px;background:var(--bg3);padding:8px 12px;border-radius:var(--r);font-size:12px;}
 
-/* MOBILE NAV */
+/* MEMBER PICKER */
+.member-picker{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.member-col-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--tx3);margin-bottom:6px;}
+.member-col-list{border:1px solid var(--bd2);border-radius:var(--rm);max-height:160px;overflow-y:auto;}
+.member-row{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;transition:all 0.12s;border-bottom:1px solid var(--bd);}
+.member-row:last-child{border-bottom:none;}
+.member-row:hover{background:var(--bg3);}
+.member-row.selected{background:var(--acl);}
+.member-row-av{width:22px;height:22px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;}
+.member-row-name{flex:1;font-size:12px;}
+.member-row-action{color:var(--gr);font-size:16px;}
+.member-row-action.remove{color:var(--rd);}
+
+/* MOBILE */
+.mob-hdr{display:none;background:var(--bge);border-bottom:1px solid var(--bd);padding:0 14px;height:52px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.mob-brand{display:flex;align-items:center;gap:8px;}
+.mob-brand-logo{width:26px;height:26px;background:linear-gradient(135deg,var(--ac),var(--pu));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.mob-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;}
+.mob-av{width:32px;height:32px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;border:2px solid var(--bd2);}
 .mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bge);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom);z-index:100;}
-.mob-nav-inner{display:flex;align-items:center;justify-content:space-around;height:60px;}
-.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;cursor:pointer;color:var(--tx3);transition:all 0.15s;padding:6px 0;position:relative;}
-.mn-item.active{color:var(--ac);}
-.mn-ico{font-size:22px;}
-.mn-lbl{font-size:10px;font-weight:600;}
-.mn-bdg{background:var(--rd);color:white;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:99px;display:none;align-items:center;justify-content:center;position:absolute;top:2px;right:25%;}
-.mn-bdg.on{display:flex;}
-.fab{display:none;position:fixed;bottom:70px;right:16px;width:52px;height:52px;background:var(--ac);border-radius:50%;border:none;cursor:pointer;align-items:center;justify-content:center;font-size:24px;color:white;box-shadow:var(--shl);z-index:90;}
+.mob-nav-inner{display:flex;height:56px;}
+.mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer;color:var(--tx3);transition:all 0.15s;position:relative;}
+.mob-nav-item.active{color:var(--ac);}
+.mob-nav-ico{font-size:20px;}
+.mob-nav-lbl{font-size:9px;font-weight:600;}
+.mob-nav-badge{position:absolute;top:4px;right:22%;background:var(--rd);color:white;font-size:8px;font-weight:700;min-width:15px;height:15px;border-radius:99px;display:none;align-items:center;justify-content:center;padding:0 3px;}
+.mob-nav-badge.on{display:flex;}
+.fab{display:none;position:fixed;bottom:68px;right:14px;width:48px;height:48px;background:var(--ac);border-radius:99px;border:none;cursor:pointer;align-items:center;justify-content:center;font-size:22px;color:white;box-shadow:var(--shl);z-index:90;}
 
 /* BOTTOM SHEETS */
-.bs-ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;align-items:flex-end;}
+.bs-ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1000;align-items:flex-end;}
 .bs-ovl.on{display:flex;}
-.bs{background:var(--bge);border-radius:var(--rh) var(--rh) 0 0;width:100%;max-height:88vh;overflow-y:auto;animation:sheetUp 0.25s ease;}
-.bs-handle{width:40px;height:4px;background:var(--bd2);border-radius:99px;margin:12px auto 16px;}
+.bs{background:var(--bge);border-radius:18px 18px 0 0;width:100%;max-height:88vh;overflow-y:auto;animation:sheetUp 0.25s ease;box-shadow:var(--shl);}
+.bs-handle{width:36px;height:4px;background:var(--bd2);border-radius:99px;margin:12px auto 16px;}
 .bs-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;padding:0 20px;margin-bottom:8px;}
-.bs-item{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;transition:all 0.15s;}
+.bs-item{display:flex;align-items:center;gap:14px;padding:13px 20px;cursor:pointer;transition:all 0.15s;}
 .bs-item:hover{background:var(--bg3);}
-.bs-ico{font-size:22px;}
-.bs-lbl{font-size:15px;font-weight:500;}
-.bs-sub{font-size:11px;color:var(--tx3);}
+.bs-item-ico{font-size:20px;width:28px;text-align:center;}
+.bs-item-lbl{font-size:14px;font-weight:500;}
+.bs-item-sub{font-size:11px;color:var(--tx3);}
 
 /* RESPONSIVE */
-@media(max-width:1024px){.sg4{grid-template-columns:repeat(2,1fr)}.cg2{grid-template-columns:1fr}.kbb{overflow-x:auto;display:flex;gap:12px;padding-bottom:12px}.kbc{min-width:280px;flex-shrink:0}.cal-wrap{grid-template-columns:1fr}}
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .charts-row{grid-template-columns:1fr;}
+  .kanban-board{overflow-x:auto;display:flex;gap:12px;padding-bottom:12px;}
+  .kanban-col{min-width:260px;flex-shrink:0;}
+  .cal-layout{grid-template-columns:1fr;}
+}
 @media(max-width:768px){
   .topbar,.sidebar{display:none!important;}
   .mob-hdr{display:flex!important;}
   .mob-nav{display:block!important;}
   .fab{display:flex!important;}
-  .app-body{padding-bottom:60px;}
-  .content{padding:16px!important;}
-  .sg4{grid-template-columns:1fr 1fr;gap:10px;}
-  .chat-wrap{grid-template-columns:1fr;height:calc(100vh - 120px);}
-  .chat-left{display:none;}
-  .chat-left.show{display:flex;position:fixed;inset:0;z-index:200;background:var(--bge);}
-  .dtb{display:block;overflow-x:auto;}
-  .cal-wrap{display:block;}
+  .content-inner{padding:14px;}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .charts-row{grid-template-columns:1fr;}
+  .chat-layout{grid-template-columns:1fr;height:calc(100vh - 110px);}
+  .chat-sidebar{display:none;position:fixed;inset:0;z-index:200;border-radius:0;}
+  .chat-sidebar.show{display:flex;}
+  .chat-main-back{display:block!important;}
+  .data-table{display:block;overflow-x:auto;}
+  .cal-layout{display:block;}
+  .cal-card{margin-bottom:14px;}
   .ovl.on{align-items:flex-end;}
-  .modal{border-radius:var(--rh) var(--rh) 0 0;width:100%;max-width:100%;max-height:88vh;}
+  .modal{border-radius:18px 18px 0 0;width:100%;max-width:100%;max-height:88vh;}
+  .member-picker{grid-template-columns:1fr;}
 }
-@media(max-width:480px){.sg4{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
-<div class="loader" id="loader"><div class="loader-spin"></div></div>
+<div class="loader" id="loader"><div class="loader-ring"></div><div class="loader-text">Memuat...</div></div>
 <div id="toast" class="toast"></div>
 
-<!-- AUTH -->
+<!-- ═══ AUTH PAGE ═══ -->
 <div id="auth-page">
   <div class="auth-bg"></div>
-  <div class="th-btn" onclick="toggleTheme()" id="th-btn">🌙</div>
+  <div class="th-float" onclick="toggleTheme()" id="thFloat">🌙</div>
   <div class="auth-card">
-    <div class="auth-logo">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">🗂</div>
       <h1>FlowDesk</h1>
-      <p>Pipeline Manajemen Kerja Modern</p>
     </div>
+    <p class="auth-subtitle">Workspace Manajemen Kerja Modern</p>
     <div class="auth-tabs">
       <div class="auth-tab active" onclick="switchAuth('login',this)">Masuk</div>
-      <div class="auth-tab" onclick="switchAuth('register',this)">Daftar</div>
+      <div class="auth-tab" onclick="switchAuth('register',this)">Daftar Akun</div>
     </div>
+    <!-- LOGIN -->
     <div id="form-login">
-      <div class="ig"><label>Username</label><input type="text" id="inp-user" placeholder="username" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="ig"><label>Password</label><input type="password" id="inp-pass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="ig"><label>Username</label><input type="text" id="inp-user" placeholder="Masukkan username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="ig"><label>Password</label><input type="password" id="inp-pass" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn-p" onclick="doLogin()"><span id="lbt">Masuk ke FlowDesk</span><span class="spn" id="lsp" style="display:none"></span></button>
       <div class="msgb err" id="lerr"></div>
-      <div style="text-align:center;margin-top:12px">
-        <span onclick="showForgotPassword()" style="font-size:13px;color:var(--tx3);cursor:pointer;text-decoration:underline">Lupa password?</span>
-      </div>
+      <div class="forgot-link"><span onclick="showForgot()">Lupa password?</span></div>
     </div>
+    <!-- REGISTER -->
     <div id="form-register" style="display:none">
-      <div class="ig"><label>Nama Lengkap</label><input type="text" id="rn" placeholder="Nama lengkap"></div>
+      <div class="ig"><label>Nama Lengkap</label><input type="text" id="rn" placeholder="Nama lengkap kamu"></div>
       <div class="ig"><label>Username</label><input type="text" id="ru" placeholder="username"></div>
       <div class="ig"><label>Email</label><input type="email" id="re" placeholder="email@domain.com"></div>
       <div class="ig"><label>Password</label><input type="password" id="rp" placeholder="Min. 6 karakter"></div>
@@ -379,145 +500,217 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
   </div>
 </div>
 
-<!-- APP -->
+<!-- ═══ APP PAGE ═══ -->
 <div id="app-page">
   <!-- Mobile Header -->
   <div class="mob-hdr">
-    <div class="mob-brand"><div class="brand-dot"></div><h2>FlowDesk</h2></div>
+    <div class="mob-brand"><div class="mob-brand-logo">🗂</div><span class="mob-brand-name">FlowDesk</span></div>
     <div class="mob-av" id="mob-av" onclick="openBS('bs-profile')"></div>
   </div>
+
   <!-- Desktop Topbar -->
   <div class="topbar">
-    <div class="brand"><div class="brand-dot"></div><h2>FlowDesk</h2></div>
-    <div class="user-pill">
-      <div class="uav" id="tb-av"></div>
-      <span class="uname" id="tb-name">-</span>
-      <span class="urole" id="tb-rb">-</span>
+    <div class="topbar-left">
+      <div class="brand-logo">🗂</div>
+      <span class="brand-name">FlowDesk</span>
     </div>
-    <div class="tb-actions">
-      <button class="tb-btn" onclick="toggleTheme()">🌙</button>
-      <button class="tb-btn" onclick="openModal('m-chpass')">Ganti Password</button>
-      <button class="tb-btn" onclick="doLogout()">Keluar</button>
+    <div class="topbar-center">
+      <div class="breadcrumb">
+        <span>Workspace</span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" id="bc-current">Dashboard</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-notif" onclick="showSec('notif',null)" title="Notifikasi">
+        🔔<div class="tb-notif-badge" id="tb-notif-badge"></div>
+      </div>
+      <div class="tb-sep"></div>
+      <button class="tb-theme" onclick="toggleTheme()" id="tb-theme-btn">🌙</button>
+      <div class="tb-sep"></div>
+      <div class="tb-user" onclick="openModal('m-profile')">
+        <div class="tb-avatar" id="tb-av"></div>
+        <div>
+          <div class="tb-uname" id="tb-name">-</div>
+        </div>
+        <span class="tb-urole" id="tb-rb">-</span>
+      </div>
     </div>
   </div>
-  <div class="app-body">
+
+  <div class="app-main">
     <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sg">Utama</div>
-      <div class="si active" onclick="showSec('dashboard',this)"><span class="ico">📊</span><span class="lbl">Dashboard</span></div>
-      <div class="si" onclick="showSec('kanban',this)"><span class="ico">🗂️</span><span class="lbl">Kanban</span></div>
-      <div class="si" onclick="showSec('tasks',this)"><span class="ico">📋</span><span class="lbl">Daftar Tugas</span></div>
-      <div class="si" onclick="showSec('calendar',this)"><span class="ico">📅</span><span class="lbl">Kalender</span></div>
-      <div class="si" onclick="showSec('chat',this)"><span class="ico">💬</span><span class="lbl">Chat</span><span class="si-badge" id="chat-bdg" style="display:none">0</span></div>
-      <div class="si" onclick="showSec('notif',this)"><span class="ico">🔔</span><span class="lbl">Notifikasi</span><span class="si-badge" id="notif-bdg" style="display:none">0</span></div>
-      <!-- MANAGER ONLY -->
-      <div class="sg mo" style="display:none">Manajemen</div>
-      <div class="si mo" onclick="showSec('submissions',this)" style="display:none"><span class="ico">📁</span><span class="lbl">Pengumpulan</span></div>
-      <div class="si mo" onclick="showSec('pending',this)" style="display:none"><span class="ico">⏳</span><span class="lbl">Permintaan</span><span class="si-badge amber" id="pnd-bdg" style="display:none">0</span></div>
-      <div class="si mo" onclick="showSec('users',this)" style="display:none"><span class="ico">👥</span><span class="lbl">Kelola User</span></div>
-      <div class="si mo" onclick="showSec('activity',this)" style="display:none"><span class="ico">📜</span><span class="lbl">Log Aktivitas</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-section">Utama</div>
+        <div class="nav-item active" onclick="showSec('dashboard',this)">
+          <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showSec('kanban',this)">
+          <span class="nav-icon">🗂️</span><span class="nav-label">Kanban Board</span>
+        </div>
+        <div class="nav-item" onclick="showSec('tasks',this)">
+          <span class="nav-icon">📋</span><span class="nav-label">Daftar Tugas</span>
+        </div>
+        <div class="nav-item" onclick="showSec('calendar',this)">
+          <span class="nav-icon">📅</span><span class="nav-label">Kalender</span>
+        </div>
+        <div class="nav-item" onclick="showSec('chat',this)">
+          <span class="nav-icon">💬</span><span class="nav-label">Chat</span>
+          <span class="nav-badge blue" id="chat-nav-badge" style="display:none">0</span>
+        </div>
+        <div class="nav-item" onclick="showSec('notif',this)">
+          <span class="nav-icon">🔔</span><span class="nav-label">Notifikasi</span>
+          <span class="nav-badge" id="notif-badge" style="display:none">0</span>
+        </div>
+        <!-- MANAGER ONLY -->
+        <div class="nav-section mo" style="display:none">Manajemen</div>
+        <div class="nav-item mo" onclick="showSec('submissions',this)" style="display:none">
+          <span class="nav-icon">📁</span><span class="nav-label">Pengumpulan</span>
+        </div>
+        <div class="nav-item mo" onclick="showSec('pending',this)" style="display:none">
+          <span class="nav-icon">⏳</span><span class="nav-label">Permintaan</span>
+          <span class="nav-badge amber" id="pnd-badge" style="display:none">0</span>
+        </div>
+        <div class="nav-item mo" onclick="showSec('users',this)" style="display:none">
+          <span class="nav-icon">👥</span><span class="nav-label">Kelola User</span>
+        </div>
+        <div class="nav-item mo" onclick="showSec('activity',this)" style="display:none">
+          <span class="nav-icon">📜</span><span class="nav-label">Log Aktivitas</span>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-item" onclick="openModal('m-chpass')">
+          <span class="nav-icon">🔑</span><span>Ganti Password</span>
+        </div>
+        <div class="sidebar-footer-item" onclick="doLogout()">
+          <span class="nav-icon">🚪</span><span>Keluar</span>
+        </div>
+      </div>
     </div>
+
     <!-- Content -->
     <div class="content">
-      <!-- DASHBOARD -->
-      <div id="sec-dashboard" class="sec on">
-        <div class="seh">
-          <div><div class="set">Dashboard</div><div class="ses" id="dgreet"></div></div>
-          <div style="font-size:11px;color:var(--tx3)" id="ddate"></div>
-        </div>
-        <div class="sg4">
-          <div class="sc blue"><div class="sc-icon">📦</div><div class="sc-label">Total Tugas</div><div class="sc-val" id="st0">0</div></div>
-          <div class="sc green"><div class="sc-icon">✅</div><div class="sc-label">Selesai</div><div class="sc-val" id="st1">0</div><div class="sc-sub" id="st1p">0%</div></div>
-          <div class="sc orange"><div class="sc-icon">⚡</div><div class="sc-label">In Progress</div><div class="sc-val" id="st2">0</div></div>
-          <div class="sc red"><div class="sc-icon">🚨</div><div class="sc-label">Overdue</div><div class="sc-val" id="st3">0</div></div>
-        </div>
-        <div class="cg2">
-          <div class="cc"><div class="ct">Progress per Minggu</div><div class="cw"><canvas id="cw"></canvas></div></div>
-          <div class="cc"><div class="ct">Distribusi Status</div><div class="cw"><canvas id="cp"></canvas></div></div>
-        </div>
-        <div class="mbc"><div class="ct">Progress Anggota Tim</div><div id="mpr"></div></div>
-      </div>
-      <!-- KANBAN -->
-      <div id="sec-kanban" class="sec">
-        <div class="kbt">
-          <div><div class="set">Kanban Board</div><div class="ses">Drag & drop untuk update status</div></div>
-          <button class="btn-add mo" onclick="openModal('m-task')" style="display:none">+ Tugas Baru</button>
-        </div>
-        <div class="kbb" id="kbb"></div>
-      </div>
-      <!-- TASKS -->
-      <div id="sec-tasks" class="sec">
-        <div class="seh"><div class="set">Daftar Tugas</div></div>
-        <div class="fbar">
-          <input type="text" class="fi" placeholder="Cari tugas..." id="si" oninput="renderTbl()">
-          <select class="fi" id="fs" onchange="renderTbl()"><option value="">Semua Status</option><option value="todo">Todo</option><option value="inprogress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select>
-          <select class="fi" id="fp" onchange="renderTbl()"><option value="">Semua Prioritas</option><option value="high">Tinggi</option><option value="med">Sedang</option><option value="low">Rendah</option></select>
-        </div>
-        <table class="dtb"><thead><tr><th>Judul</th><th>Assignee/PIC</th><th>Tipe</th><th>Prioritas</th><th>Deadline</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="ttb"></tbody></table>
-      </div>
-      <!-- CALENDAR -->
-      <div id="sec-calendar" class="sec">
-        <div class="seh"><div class="set">Kalender</div></div>
-        <div class="cal-wrap">
-          <div class="calcard">
-            <div class="calh"><button class="calnav" onclick="calP()">&#8249;</button><div class="calm" id="cml"></div><button class="calnav" onclick="calN()">&#8250;</button></div>
-            <div class="calg" id="calg"></div>
+      <div class="content-inner">
+
+        <!-- DASHBOARD -->
+        <div id="sec-dashboard" class="sec on">
+          <div class="page-hdr">
+            <div><div class="page-title" id="dash-greeting">Dashboard</div><div class="page-sub" id="dash-date"></div></div>
           </div>
-          <div class="upc-card"><div class="ct" style="margin-bottom:12px">Upcoming 30 Hari</div><div id="upc"></div></div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:var(--acg)">📦</div></div><div class="stat-val" id="st0">0</div><div class="stat-label">Total Tugas</div><div class="stat-bar"><div class="stat-bar-fill" id="st0-bar" style="background:var(--ac);width:0%"></div></div></div>
+            <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:var(--grg)">✅</div><span class="stat-trend up" id="st1-pct">0%</span></div><div class="stat-val" id="st1">0</div><div class="stat-label">Selesai</div><div class="stat-bar"><div class="stat-bar-fill" id="st1-bar" style="background:var(--gr);width:0%"></div></div></div>
+            <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:var(--org)">⚡</div></div><div class="stat-val" id="st2">0</div><div class="stat-label">In Progress</div><div class="stat-bar"><div class="stat-bar-fill" id="st2-bar" style="background:var(--or);width:0%"></div></div></div>
+            <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:var(--rdg)">🚨</div></div><div class="stat-val" id="st3">0</div><div class="stat-label">Overdue</div><div class="stat-bar"><div class="stat-bar-fill" id="st3-bar" style="background:var(--rd);width:0%"></div></div></div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card"><div class="card-title">📈 Progress per Minggu <span class="card-title-badge" style="background:var(--acg);color:var(--ac)">Bulan Ini</span></div><div class="chart-wrap"><canvas id="cw"></canvas></div></div>
+            <div class="chart-card"><div class="card-title">🍩 Distribusi Status</div><div class="chart-wrap"><canvas id="cp"></canvas></div></div>
+          </div>
+          <div class="team-card"><div class="card-title">👥 Progress Anggota Tim</div><div id="mpr"></div></div>
         </div>
-      </div>
-      <!-- CHAT -->
-      <div id="sec-chat" class="sec">
-        <div class="seh"><div class="set">Chat</div></div>
-        <div class="chat-wrap">
-          <div class="chat-left" id="chat-left">
-            <div class="chat-search"><input type="text" placeholder="Cari kontak..." id="csearch" oninput="filterContacts()"></div>
-            <div class="chat-tabs">
-              <button class="ctab on" onclick="switchCTab('group',this)">Grup</button>
-              <button class="ctab" onclick="switchCTab('personal',this)">Personal</button>
+
+        <!-- KANBAN -->
+        <div id="sec-kanban" class="sec">
+          <div class="page-hdr">
+            <div><div class="page-title">Kanban Board</div><div class="page-sub">Drag & drop atau klik tombol aksi untuk update status</div></div>
+            <div class="page-actions">
+              <button class="btn btn-primary mo" onclick="openModal('m-task')" style="display:none">+ Tugas Baru</button>
             </div>
-            <div class="clist" id="clist"></div>
           </div>
-          <div class="chat-main" id="chat-main">
-            <div class="chat-empty"><span style="font-size:48px">💬</span><span>Pilih percakapan</span></div>
+          <div class="kanban-board" id="kbb"></div>
+        </div>
+
+        <!-- TASKS -->
+        <div id="sec-tasks" class="sec">
+          <div class="page-hdr"><div class="page-title">Daftar Tugas</div></div>
+          <div class="filter-bar">
+            <input type="text" class="fi" placeholder="🔍 Cari tugas..." id="si" oninput="renderTbl()" style="flex:1;max-width:220px">
+            <select class="fi" id="fs" onchange="renderTbl()"><option value="">Semua Status</option><option value="todo">To Do</option><option value="inprogress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select>
+            <select class="fi" id="fp" onchange="renderTbl()"><option value="">Semua Prioritas</option><option value="high">Tinggi</option><option value="med">Sedang</option><option value="low">Rendah</option></select>
+          </div>
+          <table class="data-table"><thead><tr><th>Judul</th><th>Assignee/PIC</th><th>Tipe</th><th>Prioritas</th><th>Deadline</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="ttb"></tbody></table>
+        </div>
+
+        <!-- CALENDAR -->
+        <div id="sec-calendar" class="sec">
+          <div class="page-hdr"><div class="page-title">Kalender Deadline</div></div>
+          <div class="cal-layout">
+            <div class="cal-card">
+              <div class="cal-hdr"><button class="cal-nav" onclick="calP()">&#8249;</button><div class="calm" id="cml"></div><button class="cal-nav" onclick="calN()">&#8250;</button></div>
+              <div class="cal-grid" id="calg"></div>
+            </div>
+            <div class="upc-card"><div class="card-title">🗓 Upcoming 30 Hari</div><div id="upc"></div></div>
           </div>
         </div>
-      </div>
-      <!-- NOTIF -->
-      <div id="sec-notif" class="sec">
-        <div class="seh"><div class="set">Notifikasi</div><button class="abtn" onclick="markRead()">Tandai semua dibaca</button></div>
-        <div id="nl"></div>
-      </div>
-      <!-- SUBMISSIONS (MANAGER ONLY) -->
-      <div id="sec-submissions" class="sec">
-        <div class="seh"><div class="set">Pengumpulan Tugas</div></div>
-        <div id="sub-all"></div>
-      </div>
-      <!-- PENDING (MANAGER ONLY) -->
-      <div id="sec-pending" class="sec">
-        <div class="seh"><div class="set">Permintaan Pendaftaran</div></div>
-        <div id="pndl"></div>
-      </div>
-      <!-- USERS (MANAGER ONLY) -->
-      <div id="sec-users" class="sec">
-        <div class="seh"><div class="set">Kelola User</div><button class="btn-add" onclick="openModal('m-adduser')">+ Tambah User</button></div>
-        <table class="dtb"><thead><tr><th>User</th><th>Username</th><th>Email</th><th>Role</th><th>Aksi</th></tr></thead><tbody id="utb"></tbody></table>
-      </div>
-      <!-- ACTIVITY (MANAGER ONLY) -->
-      <div id="sec-activity" class="sec">
-        <div class="seh"><div class="set">Log Aktivitas</div></div>
-        <div id="actl"></div>
+
+        <!-- CHAT -->
+        <div id="sec-chat" class="sec">
+          <div class="page-hdr"><div class="page-title">Chat</div></div>
+          <div class="chat-layout">
+            <div class="chat-sidebar" id="chat-sidebar">
+              <div class="chat-sidebar-hdr">
+                <div class="chat-sidebar-title">Pesan</div>
+                <div class="chat-search-wrap">
+                  <span class="chat-search-icon">🔍</span>
+                  <input type="text" class="chat-search" placeholder="Cari kontak..." id="csearch" oninput="filterContacts()">
+                </div>
+              </div>
+              <div class="chat-tabs">
+                <button class="ctab on" onclick="switchCTab('group',this)">🌐 Grup</button>
+                <button class="ctab" onclick="switchCTab('personal',this)">👤 Personal</button>
+              </div>
+              <div class="chat-list" id="clist"></div>
+            </div>
+            <div class="chat-main" id="chat-main">
+              <div class="chat-empty-state"><span class="chat-empty-icon">💬</span><span style="font-size:14px;font-weight:600">Pilih percakapan</span><span style="font-size:12px">Mulai chat dengan tim kamu</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIF -->
+        <div id="sec-notif" class="sec">
+          <div class="page-hdr"><div class="page-title">Notifikasi</div><div class="page-actions"><button class="btn btn-secondary btn-sm" onclick="markRead()">✓ Tandai semua dibaca</button></div></div>
+          <div id="nl"></div>
+        </div>
+
+        <!-- SUBMISSIONS -->
+        <div id="sec-submissions" class="sec">
+          <div class="page-hdr"><div class="page-title">Pengumpulan & Bukti Tugas</div></div>
+          <div id="sub-all"></div>
+        </div>
+
+        <!-- PENDING -->
+        <div id="sec-pending" class="sec">
+          <div class="page-hdr"><div class="page-title">Permintaan Pendaftaran</div></div>
+          <div id="pndl"></div>
+        </div>
+
+        <!-- USERS -->
+        <div id="sec-users" class="sec">
+          <div class="page-hdr"><div class="page-title">Kelola User</div><div class="page-actions"><button class="btn btn-primary" onclick="openModal('m-adduser')">+ Tambah User</button></div></div>
+          <table class="data-table"><thead><tr><th>User</th><th>Username</th><th>Email</th><th>Role</th><th>Bergabung</th><th>Aksi</th></tr></thead><tbody id="utb"></tbody></table>
+        </div>
+
+        <!-- ACTIVITY -->
+        <div id="sec-activity" class="sec">
+          <div class="page-hdr"><div class="page-title">Log Aktivitas</div></div>
+          <div id="actl"></div>
+        </div>
+
       </div>
     </div>
   </div>
+
   <!-- Mobile Bottom Nav -->
   <div class="mob-nav">
     <div class="mob-nav-inner">
-      <button class="mn-item active" id="mn-dashboard" onclick="mobileNav('dashboard',this)"><div class="mn-ico">📊</div><div class="mn-lbl">Dashboard</div></button>
-      <button class="mn-item" id="mn-kanban" onclick="mobileNav('kanban',this)"><div class="mn-ico">🗂️</div><div class="mn-lbl">Kanban</div></button>
-      <button class="mn-item" id="mn-chat" onclick="mobileNav('chat',this)"><div class="mn-ico">💬</div><div class="mn-lbl">Chat</div><div class="mn-bdg" id="mn-chat-bdg">0</div></button>
-      <button class="mn-item" id="mn-notif" onclick="mobileNav('notif',this)"><div class="mn-ico">🔔</div><div class="mn-lbl">Notif</div><div class="mn-bdg" id="mn-notif-bdg">0</div></button>
-      <button class="mn-item" onclick="openBS('bs-more')"><div class="mn-ico">☰</div><div class="mn-lbl">Menu</div></button>
+      <button class="mob-nav-item active" id="mn-dashboard" onclick="mobileNav('dashboard',this)"><div class="mob-nav-ico">📊</div><div class="mob-nav-lbl">Dashboard</div></button>
+      <button class="mob-nav-item" id="mn-kanban" onclick="mobileNav('kanban',this)"><div class="mob-nav-ico">🗂️</div><div class="mob-nav-lbl">Kanban</div></button>
+      <button class="mob-nav-item" id="mn-chat" onclick="mobileNav('chat',this)"><div class="mob-nav-ico">💬</div><div class="mob-nav-lbl">Chat</div><div class="mob-nav-badge" id="mn-chat-bdg">0</div></button>
+      <button class="mob-nav-item" id="mn-notif" onclick="mobileNav('notif',this)"><div class="mob-nav-ico">🔔</div><div class="mob-nav-lbl">Notif</div><div class="mob-nav-badge" id="mn-notif-bdg">0</div></button>
+      <button class="mob-nav-item" onclick="openBS('bs-more')"><div class="mob-nav-ico">☰</div><div class="mob-nav-lbl">Menu</div></button>
     </div>
   </div>
   <button class="fab mo" id="fab" onclick="openModal('m-task')" style="display:none">+</button>
@@ -527,13 +720,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
 <div class="bs-ovl" id="bs-profile" onclick="if(event.target===this)closeBS('bs-profile')">
   <div class="bs">
     <div class="bs-handle"></div>
-    <div style="display:flex;align-items:center;gap:16px;padding:12px 20px;background:var(--bg3);margin-bottom:8px">
-      <div id="bs-av" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700"></div>
-      <div><div style="font-size:16px;font-weight:700" id="bs-name"></div><span id="bs-rb" class="urole"></span></div>
+    <div style="display:flex;align-items:center;gap:14px;padding:12px 20px 16px;background:var(--bg3);margin-bottom:6px">
+      <div id="bs-av" style="width:48px;height:48px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0"></div>
+      <div><div style="font-size:16px;font-weight:700" id="bs-name"></div><span class="tb-urole" id="bs-rb"></span></div>
     </div>
-    <div class="bs-item" onclick="closeBS('bs-profile');openModal('m-chpass')"><span class="bs-ico">🔑</span><div><div class="bs-lbl">Ganti Password</div><div class="bs-sub">Ubah password akun</div></div></div>
-    <div class="bs-item" onclick="toggleTheme()"><span class="bs-ico" id="bs-theme-ico">🌙</span><div><div class="bs-lbl">Tema</div><div class="bs-sub">Dark / Light mode</div></div></div>
-    <div class="bs-item" onclick="doLogout()"><span class="bs-ico">🚪</span><div><div class="bs-lbl" style="color:var(--rd)">Keluar</div><div class="bs-sub">Logout dari akun</div></div></div>
+    <div class="bs-item" onclick="closeBS('bs-profile');openModal('m-chpass')"><span class="bs-item-ico">🔑</span><div><div class="bs-item-lbl">Ganti Password</div><div class="bs-item-sub">Ubah password akun</div></div></div>
+    <div class="bs-item" onclick="toggleTheme()"><span class="bs-item-ico" id="bs-theme-ico">🌙</span><div><div class="bs-item-lbl">Tema</div><div class="bs-item-sub">Dark / Light mode</div></div></div>
+    <div class="bs-item" onclick="doLogout()" style="margin-bottom:8px"><span class="bs-item-ico">🚪</span><div><div class="bs-item-lbl" style="color:var(--rd)">Keluar</div><div class="bs-item-sub">Logout dari akun</div></div></div>
   </div>
 </div>
 
@@ -542,182 +735,207 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
   <div class="bs">
     <div class="bs-handle"></div>
     <div class="bs-title">Menu Lainnya</div>
-    <div class="bs-item" onclick="closeBS('bs-more');showSec('tasks',null)"><span class="bs-ico">📋</span><div><div class="bs-lbl">Daftar Tugas</div></div></div>
-    <div class="bs-item" onclick="closeBS('bs-more');showSec('calendar',null)"><span class="bs-ico">📅</span><div><div class="bs-lbl">Kalender</div></div></div>
-    <!-- Manager only items -->
-    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('submissions',null)"><span class="bs-ico">📁</span><div><div class="bs-lbl">Pengumpulan</div></div></div>
-    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('users',null)"><span class="bs-ico">👥</span><div><div class="bs-lbl">Kelola User</div></div></div>
-    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('pending',null)"><span class="bs-ico">⏳</span><div><div class="bs-lbl">Permintaan</div></div></div>
-    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('activity',null)"><span class="bs-ico">📜</span><div><div class="bs-lbl">Log Aktivitas</div></div></div>
+    <div class="bs-item" onclick="closeBS('bs-more');showSec('tasks',null)"><span class="bs-item-ico">📋</span><div><div class="bs-item-lbl">Daftar Tugas</div></div></div>
+    <div class="bs-item" onclick="closeBS('bs-more');showSec('calendar',null)"><span class="bs-item-ico">📅</span><div><div class="bs-item-lbl">Kalender</div></div></div>
+    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('submissions',null)"><span class="bs-item-ico">📁</span><div><div class="bs-item-lbl">Pengumpulan</div></div></div>
+    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('users',null)"><span class="bs-item-ico">👥</span><div><div class="bs-item-lbl">Kelola User</div></div></div>
+    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('pending',null)"><span class="bs-item-ico">⏳</span><div><div class="bs-item-lbl">Permintaan</div></div></div>
+    <div class="bs-item mo" style="display:none" onclick="closeBS('bs-more');showSec('activity',null)" style="margin-bottom:8px"><span class="bs-item-ico">📜</span><div><div class="bs-item-lbl">Log Aktivitas</div></div></div>
   </div>
 </div>
 
-<!-- MODALS -->
+<!-- MODAL: TAMBAH TUGAS -->
 <div class="ovl" id="m-task">
   <div class="modal">
-    <div class="mtl">Tambah Tugas Baru</div>
+    <div class="modal-title">🆕 Tambah Tugas Baru</div>
     <div class="ig">
       <label>Tipe Tugas</label>
-      <div style="display:flex;gap:12px">
-        <div id="tipe-ind" onclick="switchTipe('individu')" style="flex:1;padding:12px;border:1px solid var(--ac);border-radius:var(--rm);text-align:center;background:var(--acg);cursor:pointer">
-          <div style="font-size:22px">👤</div><div style="font-size:12px;font-weight:600;color:var(--ac)">Individu</div>
+      <div style="display:flex;gap:10px">
+        <div id="tipe-ind" onclick="switchTipe('individu')" style="flex:1;padding:12px;border:1.5px solid var(--ac);border-radius:var(--rm);text-align:center;background:var(--acg);cursor:pointer;transition:all 0.2s">
+          <div style="font-size:22px;margin-bottom:4px">👤</div><div style="font-size:12px;font-weight:700;color:var(--ac)">Individu</div>
         </div>
-        <div id="tipe-grp" onclick="switchTipe('group')" style="flex:1;padding:12px;border:1px solid var(--bd2);border-radius:var(--rm);text-align:center;cursor:pointer">
-          <div style="font-size:22px">👥</div><div style="font-size:12px;font-weight:600;color:var(--tx3)">Group</div>
+        <div id="tipe-grp" onclick="switchTipe('group')" style="flex:1;padding:12px;border:1.5px solid var(--bd2);border-radius:var(--rm);text-align:center;cursor:pointer;transition:all 0.2s">
+          <div style="font-size:22px;margin-bottom:4px">👥</div><div style="font-size:12px;font-weight:700;color:var(--tx3)">Group</div>
         </div>
       </div>
     </div>
-    <div class="ig"><label>Judul</label><input type="text" id="ft" placeholder="Judul tugas..."></div>
-    <div class="ig"><label>Deskripsi</label><textarea id="fd" rows="2" placeholder="Detail..."></textarea></div>
-    <div id="field-ind">
-      <div class="ig"><label>Assignee</label><select id="fa"></select></div>
-    </div>
+    <div class="ig"><label>Judul Tugas</label><input type="text" id="ft" placeholder="Deskripsikan tugas..."></div>
+    <div class="ig"><label>Deskripsi</label><textarea id="fd" placeholder="Detail lebih lanjut..." rows="2"></textarea></div>
+    <div id="field-ind"><div class="ig"><label>Assignee</label><select id="fa"></select></div></div>
     <div id="field-grp" style="display:none">
-      <div class="ig"><label>Nama Group</label><input type="text" id="fgn" placeholder="Nama group..."></div>
+      <div class="ig"><label>Nama Group</label><input type="text" id="fgn" placeholder="Nama group tugas..."></div>
       <div class="ig"><label>PIC (Penanggung Jawab)</label><select id="fpic" onchange="renderMP()"></select></div>
       <div class="ig">
         <label>Anggota Group</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="member-picker">
           <div>
-            <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Tersedia</div>
-            <div id="mp-avail" style="border:1px solid var(--bd2);border-radius:var(--rm);max-height:160px;overflow-y:auto"></div>
+            <div class="member-col-title">Tersedia <span id="avail-cnt" style="color:var(--tx3)"></span></div>
+            <div class="member-col-list" id="mp-avail"></div>
           </div>
           <div>
-            <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">Anggota <span id="mp-cnt" style="color:var(--ac)">(0)</span></div>
-            <div id="mp-sel" style="border:1px solid var(--bd2);border-radius:var(--rm);max-height:160px;overflow-y:auto"></div>
+            <div class="member-col-title">Dipilih <span id="mp-cnt" style="color:var(--ac)">(0)</span></div>
+            <div class="member-col-list" id="mp-sel"></div>
           </div>
         </div>
       </div>
     </div>
     <div class="g2">
-      <div class="ig"><label>Prioritas</label><select id="fpr"><option value="high">Tinggi</option><option value="med" selected>Sedang</option><option value="low">Rendah</option></select></div>
+      <div class="ig"><label>Prioritas</label><select id="fpr"><option value="high">🔴 Tinggi</option><option value="med" selected>🟡 Sedang</option><option value="low">🟢 Rendah</option></select></div>
       <div class="ig"><label>Deadline</label><input type="date" id="fdl"></div>
     </div>
-    <div class="mft"><button class="btn-sec" onclick="closeModal('m-task')">Batal</button><button class="btn-p" onclick="saveTask()"><span>Simpan</span><span class="spn" id="sp-task" style="display:none"></span></button></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-task')">Batal</button><button class="btn btn-primary" onclick="saveTask()"><span>Simpan & Kirim</span><span class="spn" id="sp-task" style="display:none"></span></button></div>
   </div>
 </div>
 
+<!-- MODAL: UPDATE STATUS -->
 <div class="ovl" id="m-status">
   <div class="modal">
-    <div class="mtl" id="mst-title">Update Status</div>
-    <input type="hidden" id="mst-tid">
-    <input type="hidden" id="mst-status">
-    <div style="padding:10px;background:var(--bg3);border-radius:var(--rm);margin-bottom:16px;font-size:13px" id="mst-desc"></div>
-    <div class="ig"><label>Catatan Progres</label><textarea id="mst-note" rows="3" placeholder="Keterangan update..."></textarea></div>
+    <div class="modal-title" id="mst-title">⚡ Update Status</div>
+    <input type="hidden" id="mst-tid"><input type="hidden" id="mst-status">
+    <div style="padding:10px 12px;background:var(--bg3);border-radius:var(--r);margin-bottom:16px;font-size:13px;color:var(--tx2);border-left:3px solid var(--ac)" id="mst-desc"></div>
+    <div class="ig"><label>Catatan Progres</label><textarea id="mst-note" placeholder="Tuliskan update, kendala, atau keterangan..." rows="3"></textarea></div>
     <div class="ig"><label>Upload Bukti</label>
-      <div class="ua" onclick="document.getElementById('mst-file').click()">
-        <div style="font-size:28px">📎</div>
-        <div style="font-size:12px;color:var(--tx3)">Klik untuk upload file</div>
-        <input type="file" id="mst-file" style="display:none" accept="image/*,.pdf,.doc,.docx,.xlsx" onchange="prevFile(this)">
+      <div class="upload-area">
+        <input type="file" id="mst-file" accept="image/*,.pdf,.doc,.docx,.xlsx" onchange="prevFile(this)">
+        <div style="font-size:28px;margin-bottom:6px">📎</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">Klik atau drag file ke sini</div>
+        <div style="font-size:11px;color:var(--tx3)">Gambar, PDF, Doc, Excel — Maks. 10MB</div>
       </div>
-      <div class="up-prev" id="up-prev" style="display:none">
-        <span>📄</span><span id="up-name"></span>
-        <button onclick="clearFile()" style="margin-left:auto;background:none;border:none;color:var(--rd);cursor:pointer">X</button>
+      <div class="file-preview" id="up-prev" style="display:none">
+        <span>📄</span><span id="up-name" style="flex:1"></span>
+        <button onclick="clearFile()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:16px">✕</button>
       </div>
     </div>
-    <div class="mft"><button class="btn-sec" onclick="closeModal('m-status')">Batal</button><button class="btn-p" onclick="submitStatus()"><span>Update</span><span class="spn" id="sp-status" style="display:none"></span></button></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-status')">Batal</button><button class="btn btn-primary" onclick="submitStatus()"><span>Update Status</span><span class="spn" id="sp-status" style="display:none"></span></button></div>
   </div>
 </div>
 
+<!-- MODAL: DETAIL TUGAS -->
 <div class="ovl" id="m-detail">
   <div class="modal modal-lg">
-    <div class="mtl" id="mdet-title">Detail Tugas</div>
+    <div class="modal-title" id="mdet-title">📋 Detail Tugas</div>
     <div id="mdet-body"></div>
-    <div class="mft"><button class="btn-sec" onclick="closeModal('m-detail')">Tutup</button></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-detail')">Tutup</button></div>
   </div>
 </div>
 
+<!-- MODAL: TAMBAH USER -->
 <div class="ovl" id="m-adduser">
   <div class="modal">
-    <div class="mtl">Tambah User Baru</div>
-    <div class="g2"><div class="ig"><label>Nama</label><input type="text" id="aun"></div><div class="ig"><label>Username</label><input type="text" id="auu"></div></div>
-    <div class="ig"><label>Email</label><input type="email" id="aue"></div>
-    <div class="g2"><div class="ig"><label>Password</label><input type="password" id="aup"></div><div class="ig"><label>Role</label><select id="aur"><option value="teamlead">Team Lead</option><option value="karyawan">Karyawan</option></select></div></div>
+    <div class="modal-title">👤 Tambah User Baru</div>
+    <div class="g2"><div class="ig"><label>Nama</label><input type="text" id="aun" placeholder="Nama lengkap"></div><div class="ig"><label>Username</label><input type="text" id="auu" placeholder="username"></div></div>
+    <div class="ig"><label>Email</label><input type="email" id="aue" placeholder="email@domain.com"></div>
+    <div class="g2"><div class="ig"><label>Password</label><input type="password" id="aup" placeholder="Min. 6 karakter"></div><div class="ig"><label>Role</label><select id="aur"><option value="teamlead">Team Lead</option><option value="karyawan">Karyawan</option></select></div></div>
     <div class="msgb err" id="au-err"></div>
-    <div class="mft"><button class="btn-sec" onclick="closeModal('m-adduser')">Batal</button><button class="btn-p" onclick="saveUser()"><span>Simpan</span><span class="spn" id="sp-user" style="display:none"></span></button></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-adduser')">Batal</button><button class="btn btn-primary" onclick="saveUser()"><span>Simpan</span><span class="spn" id="sp-user" style="display:none"></span></button></div>
   </div>
 </div>
 
+<!-- MODAL: RESET PASSWORD -->
 <div class="ovl" id="m-reset">
   <div class="modal">
-    <div class="mtl">Reset Password</div>
+    <div class="modal-title">🔑 Reset Password User</div>
     <input type="hidden" id="rid">
     <div class="ig"><label>Password Baru</label><input type="password" id="rpass" placeholder="Min. 6 karakter"></div>
     <div class="msgb err" id="rerr"></div>
-    <div class="mft"><button class="btn-sec" onclick="closeModal('m-reset')">Batal</button><button class="btn-dng" onclick="doReset()">Reset</button></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-reset')">Batal</button><button class="btn btn-danger" onclick="doReset()">Reset Password</button></div>
   </div>
 </div>
 
+<!-- MODAL: GANTI PASSWORD -->
 <div class="ovl" id="m-chpass">
   <div class="modal">
-    <div class="mtl">Ganti Password</div>
-    <div class="ig"><label>Password Lama</label><input type="password" id="cpold"></div>
+    <div class="modal-title">🔐 Ganti Password</div>
+    <div class="ig"><label>Password Lama</label><input type="password" id="cpold" placeholder="Password saat ini"></div>
     <div class="ig"><label>Password Baru</label><input type="password" id="cpnew" placeholder="Min. 6 karakter"></div>
     <div class="msgb err" id="cperr"></div>
-    <div class="mft"><button class="btn-sec" onclick="closeModal('m-chpass')">Batal</button><button class="btn-p" onclick="doChpass()"><span>Simpan</span><span class="spn" id="sp-cp" style="display:none"></span></button></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-chpass')">Batal</button><button class="btn btn-primary" onclick="doChpass()"><span>Simpan</span><span class="spn" id="sp-cp" style="display:none"></span></button></div>
   </div>
 </div>
 
 <!-- MODAL: LUPA PASSWORD -->
 <div class="ovl" id="m-forgot">
   <div class="modal">
-    <div class="mtl">🔑 Lupa Password</div>
-    <div id="forgot-step1">
-      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Masukkan email yang terdaftar. Kami akan mengirim link untuk reset password.</p>
+    <div class="modal-title">🔑 Lupa Password</div>
+    <div id="forgot-s1">
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Masukkan email terdaftar. Link reset password akan dikirim ke email kamu.</p>
       <div class="ig"><label>Email</label><input type="email" id="forgot-email" placeholder="email@domain.com" onkeydown="if(event.key==='Enter')submitForgot()"></div>
-      <div class="msgb" id="forgot-msg" style="display:none"></div>
-      <div class="mft">
-        <button class="btn-sec" onclick="closeModal('m-forgot')">Batal</button>
-        <button class="btn-p" onclick="submitForgot()"><span id="forgot-btn-text">Kirim Link Reset</span><span class="spn" id="forgot-spn" style="display:none"></span></button>
-      </div>
+      <div class="msgb err" id="forgot-msg"></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-forgot')">Batal</button><button class="btn btn-primary" onclick="submitForgot()"><span id="forgot-btn">Kirim Link Reset</span><span class="spn" id="forgot-spn" style="display:none"></span></button></div>
     </div>
-    <div id="forgot-step2" style="display:none;text-align:center">
-      <div style="font-size:48px;margin-bottom:16px">📧</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Email Terkirim!</div>
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Jika email terdaftar, link reset password telah dikirim. Cek inbox atau folder spam kamu.</div>
-      <div style="font-size:12px;color:var(--tx3);background:var(--bg3);padding:10px;border-radius:var(--rm);margin-bottom:16px">Link berlaku selama <b>1 jam</b></div>
-      <button class="btn-p" onclick="closeModal('m-forgot');document.getElementById('forgot-step1').style.display='block';document.getElementById('forgot-step2').style.display='none';">Tutup</button>
+    <div id="forgot-s2" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:52px;margin-bottom:16px">📧</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Link Terkirim!</div>
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Cek inbox atau folder spam email kamu. Link berlaku <b>1 jam</b>.</div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="closeModal('m-forgot');resetForgotForm()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PROFILE (desktop) -->
+<div class="ovl" id="m-profile">
+  <div class="modal">
+    <div class="modal-title">👤 Profil Akun</div>
+    <div style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg3);border-radius:var(--rm);margin-bottom:20px">
+      <div id="prof-av" style="width:54px;height:54px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0"></div>
+      <div><div style="font-size:16px;font-weight:700" id="prof-name"></div><div id="prof-role" class="tb-urole" style="margin-top:4px"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('m-profile')">Tutup</button>
+      <button class="btn btn-secondary" onclick="closeModal('m-profile');openModal('m-chpass')">🔑 Ganti Password</button>
+      <button class="btn btn-danger btn-sm" onclick="doLogout()">🚪 Keluar</button>
     </div>
   </div>
 </div>
 
 <script>
+// ═══════════════ CONSTANTS ═══════════════
 var RM={manager:'Manager',teamlead:'Team Lead',karyawan:'Karyawan'};
 var PM={high:'Tinggi',med:'Sedang',low:'Rendah'};
 var SM={todo:'To Do',inprogress:'In Progress',review:'Review',done:'Selesai'};
 var NM={todo:'Mulai',inprogress:'Review',review:'Selesai'};
 var NS={todo:'inprogress',inprogress:'review',review:'done'};
-var AC=['#10b981','#8b5cf6','#3b82f6','#f59e0b','#ef4444'];
+var COLORS=['#5b8ff9','#a855f7','#22c55e','#f59e0b','#ef4444','#14b8a6','#ec4899'];
+var MANAGER_PAGES=['submissions','pending','users','activity'];
+var PAGE_NAMES={dashboard:'Dashboard',kanban:'Kanban Board',tasks:'Daftar Tugas',calendar:'Kalender',chat:'Chat',notif:'Notifikasi',submissions:'Pengumpulan',pending:'Permintaan',users:'Kelola User',activity:'Log Aktivitas'};
+
+// ═══════════════ STATE ═══════════════
 var CU=null,AT=[],AU=[],dragId=null;
 var cY=new Date().getFullYear(),cM=new Date().getMonth();
 var cW=null,cP=null;
-var chatMode='group',chatTarget=null,chatTimer=null,allContacts=[];
+var chatMode='group',chatTarget=null,chatTimer=null,typingTimer=null,allContacts=[];
 var selMembers=new Set(),curTipe='individu';
-var MANAGER_PAGES=['submissions','pending','users','activity'];
 
+// ═══════════════ UTILS ═══════════════
+function av(n){return(n||'?').split(' ').map(function(x){return x[0];}).join('').slice(0,2).toUpperCase();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function color(i){return COLORS[i%COLORS.length];}
+function setSp(id,s){var el=document.getElementById(id);if(el)el.style.display=s?'inline-block':'none';}
+function showLoader(){document.getElementById('loader').classList.add('on');}
+function hideLoader(){document.getElementById('loader').classList.remove('on');}
+
+var toastTimer=null;
+function toast(msg,type,icon){
+  var el=document.getElementById('toast');
+  var icons={success:'✅',error:'❌',info:'ℹ️'};
+  el.innerHTML='<span class="toast-icon">'+(icon||icons[type]||'ℹ️')+'</span>'+esc(msg);
+  el.className='toast '+type+' show';
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show');},3200);
+}
+
+// ═══════════════ THEME ═══════════════
 function applyTheme(t){
   document.documentElement.setAttribute('data-theme',t);
-  document.querySelectorAll('.tb-btn').forEach(function(b){if(b.textContent==='🌙'||b.textContent==='☀')b.textContent=t==='dark'?'☀':'🌙';});
-  var thBtn=document.getElementById('th-btn');if(thBtn)thBtn.textContent=t==='dark'?'☀':'🌙';
-  var bsIco=document.getElementById('bs-theme-ico');if(bsIco)bsIco.textContent=t==='dark'?'☀':'🌙';
+  var ico=t==='dark'?'☀':'🌙';
+  var els=['tb-theme-btn','thFloat','bs-theme-ico'];
+  els.forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=ico;});
   localStorage.setItem('fdt',t);
-  if(cW)setTimeout(rCharts,50);
+  if(cW)setTimeout(rCharts,80);
 }
 function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');}
 applyTheme(localStorage.getItem('fdt')||'dark');
 
-var _tt=null;
-function toast(msg,type){
-  var el=document.getElementById('toast');
-  el.textContent=msg;el.className='toast '+type+' show';
-  clearTimeout(_tt);_tt=setTimeout(function(){el.classList.remove('show');},3000);
-}
-function showLoader(){document.getElementById('loader').classList.add('on');}
-function hideLoader(){document.getElementById('loader').classList.remove('on');}
-function setSp(id,s){var el=document.getElementById(id);if(el)el.style.display=s?'inline-block':'none';}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function av(name){return name.split(' ').map(function(x){return x[0];}).join('').slice(0,2).toUpperCase();}
-
+// ═══════════════ AUTH ═══════════════
 function switchAuth(tab,el){
   document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active');});
   el.classList.add('active');
@@ -733,7 +951,7 @@ function doLogin(){
   }).then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
   .then(function(res){
     if(!res.ok){err.style.display='block';err.textContent=res.data.error;}
-    else{CU=res.data.user;showApp();}
+    else{CU=res.data.user;initApp();}
   }).catch(function(){err.style.display='block';err.textContent='Gagal terhubung ke server';})
   .finally(function(){document.getElementById('lbt').style.display='inline';setSp('lsp',false);});
 }
@@ -754,47 +972,63 @@ function doRegister(){
 }
 
 function doLogout(){
-  clearInterval(chatTimer);
+  clearInterval(chatTimer);clearTimeout(typingTimer);
   fetch('/api/auth/logout',{method:'POST'}).catch(function(){});
   CU=null;AT=[];AU=[];
   document.getElementById('app-page').style.display='none';
   document.getElementById('auth-page').style.display='flex';
 }
 
+function showForgot(){openModal('m-forgot');}
+function resetForgotForm(){
+  document.getElementById('forgot-s1').style.display='block';
+  document.getElementById('forgot-s2').style.display='none';
+  document.getElementById('forgot-email').value='';
+  document.getElementById('forgot-msg').style.display='none';
+}
+function submitForgot(){
+  var email=document.getElementById('forgot-email').value.trim();
+  var msg=document.getElementById('forgot-msg');msg.style.display='none';
+  if(!email){msg.style.display='block';msg.textContent='Email wajib diisi';return;}
+  document.getElementById('forgot-btn').style.display='none';setSp('forgot-spn',true);
+  fetch('/api/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.success){document.getElementById('forgot-s1').style.display='none';document.getElementById('forgot-s2').style.display='block';}
+    else{msg.style.display='block';msg.textContent=d.error||'Gagal';}
+  }).catch(function(){msg.style.display='block';msg.textContent='Gagal terhubung';})
+  .finally(function(){document.getElementById('forgot-btn').style.display='inline';setSp('forgot-spn',false);});
+}
+
+// ═══════════════ APP INIT ═══════════════
 function greet(n){var h=new Date().getHours();return(h<12?'Selamat pagi':h<15?'Selamat siang':h<18?'Selamat sore':'Selamat malam')+', '+n+'!';}
 
-function setAv(el,name,color){
+function setAv(el,name,c){
   if(!el)return;
-  el.style.background=color+'22';el.style.color=color;
-  el.textContent=av(name);
+  el.style.background=c+'22';el.style.color=c;el.textContent=av(name);
 }
 
-function showApp(){
+function initApp(){
   document.getElementById('auth-page').style.display='none';
   document.getElementById('app-page').style.display='block';
-  var color=CU.role==='manager'?AC[0]:CU.role==='teamlead'?AC[1]:AC[2];
-  setAv(document.getElementById('tb-av'),CU.name,color);
-  setAv(document.getElementById('mob-av'),CU.name,color);
-  setAv(document.getElementById('bs-av'),CU.name,color);
+  var c=COLORS[CU.role==='manager'?0:CU.role==='teamlead'?2:4];
+  setAv(document.getElementById('tb-av'),CU.name,c);
+  setAv(document.getElementById('mob-av'),CU.name,c);
+  setAv(document.getElementById('bs-av'),CU.name,c);
+  setAv(document.getElementById('prof-av'),CU.name,c);
   document.getElementById('tb-name').textContent=CU.name;
   document.getElementById('bs-name').textContent=CU.name;
-  var rbEl=document.getElementById('tb-rb');
-  rbEl.textContent=RM[CU.role];
-  rbEl.className='urole '+CU.role;
-  var bsRb=document.getElementById('bs-rb');
-  bsRb.textContent=RM[CU.role];
-  bsRb.className='urole '+CU.role;
-  document.getElementById('ddate').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('dgreet').textContent=greet(CU.name);
-  if(CU.role==='manager'){
-    document.querySelectorAll('.mo').forEach(function(el){el.style.display='';});
-  } else {
-    document.querySelectorAll('.mo').forEach(function(el){el.style.display='none';});
-  }
-  loadAll();
-  startChatPoll();
+  document.getElementById('prof-name').textContent=CU.name;
+  var rb=document.getElementById('tb-rb');rb.textContent=RM[CU.role];rb.className='tb-urole '+CU.role;
+  var bsrb=document.getElementById('bs-rb');bsrb.textContent=RM[CU.role];bsrb.className='tb-urole '+CU.role;
+  var prb=document.getElementById('prof-role');prb.textContent=RM[CU.role];prb.className='tb-urole '+CU.role;
+  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('dash-greeting').textContent=greet(CU.name);
+  if(CU.role==='manager'){document.querySelectorAll('.mo').forEach(function(el){el.style.display='';});}
+  else{document.querySelectorAll('.mo').forEach(function(el){el.style.display='none';});}
+  loadAll();startChatPoll();
 }
 
+// ═══════════════ DATA ═══════════════
 function loadAll(){
   showLoader();
   Promise.all([ldTasks(),ldUsers(),ldStats(),ldNotifs()]).then(function(){
@@ -808,102 +1042,118 @@ function ldUsers(){
   return fetch('/api/users').then(function(r){return r.json();}).then(function(d){
     AU=d;
     var nm=d.filter(function(u){return u.role!=='manager';});
-    document.getElementById('fa').innerHTML=nm.map(function(u){return '<option value="'+u.id+'">'+u.name+' - '+RM[u.role]+'</option>';}).join('');
+    document.getElementById('fa').innerHTML=nm.map(function(u){return '<option value="'+u.id+'">'+u.name+' — '+RM[u.role]+'</option>';}).join('');
   });
 }
 function ldStats(){
   return fetch('/api/tasks/stats').then(function(r){return r.json();}).then(function(s){
+    var total=s.total||1;
     document.getElementById('st0').textContent=s.total;
     document.getElementById('st1').textContent=s.done;
     document.getElementById('st2').textContent=s.inprogress;
     document.getElementById('st3').textContent=s.overdue;
-    document.getElementById('st1p').textContent=(s.total>0?Math.round(s.done/s.total*100):0)+'% selesai';
+    var donePct=Math.round(s.done/total*100);
+    document.getElementById('st1-pct').textContent=donePct+'%';
+    document.getElementById('st0-bar').style.width='100%';
+    document.getElementById('st1-bar').style.width=donePct+'%';
+    document.getElementById('st2-bar').style.width=Math.round(s.inprogress/total*100)+'%';
+    document.getElementById('st3-bar').style.width=Math.round(s.overdue/total*100)+'%';
   });
 }
 function ldNotifs(){
   return fetch('/api/notifications').then(function(r){return r.json();}).then(function(ns){
     var u=ns.filter(function(n){return !n.is_read;}).length;
-    var b=document.getElementById('notif-bdg');b.textContent=u;b.style.display=u>0?'inline':'none';
-    var mb=document.getElementById('mn-notif-bdg');if(mb){mb.textContent=u;mb.className='mn-bdg'+(u>0?' on':'');}
+    var b=document.getElementById('notif-badge');b.textContent=u;b.style.display=u>0?'inline':'none';
+    var tb=document.getElementById('tb-notif-badge');tb.className='tb-notif-badge'+(u>0?' on':'');
+    var mb=document.getElementById('mn-notif-bdg');if(mb){mb.textContent=u;mb.className='mob-nav-badge'+(u>0?' on':'');}
     document.getElementById('nl').innerHTML=ns.length===0
-      ?'<div class="empty"><span class="empty-ico">🔔</span>Tidak ada notifikasi</div>'
-      :ns.map(function(n){return '<div class="ni'+(n.is_read?'':' unr')+'"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+n.message+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">'+new Date(n.created_at).toLocaleString('id-ID')+'</div></div>'+(n.is_read?'':'<div class="ni-dot"></div>')+'</div>';}).join('');
+      ?'<div class="empty-state"><span class="empty-icon">🔔</span>Tidak ada notifikasi</div>'
+      :ns.map(function(n){
+        var bgMap={info:'var(--acg)',warn:'var(--org)',danger:'var(--rdg)',success:'var(--grg)'};
+        var icoMap={info:'ℹ️',warn:'⏰',danger:'⚠️',success:'✅'};
+        return '<div class="notif-item'+(n.is_read?'':' unread')+'"><div class="notif-icon-wrap" style="background:'+(bgMap[n.type]||'var(--acg)')+'">'+icoMap[n.type]+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(n.message)+'</div><div style="font-size:11px;color:var(--tx3);margin-top:3px">'+new Date(n.created_at).toLocaleString('id-ID')+'</div></div>'+(n.is_read?'':'<div class="notif-dot"></div>')+'</div>';
+      }).join('');
   });
 }
 function markRead(){
   fetch('/api/notifications/read',{method:'PATCH'});
-  document.getElementById('notif-bdg').style.display='none';
-  var mb=document.getElementById('mn-notif-bdg');if(mb)mb.className='mn-bdg';
-  ldNotifs().then(function(){toast('Semua dibaca','success');});
+  document.getElementById('notif-badge').style.display='none';
+  document.getElementById('tb-notif-badge').className='tb-notif-badge';
+  ldNotifs().then(function(){toast('Semua notifikasi dibaca','success');});
 }
 function ldPending(){
   fetch('/api/auth/pending').then(function(r){return r.json();}).then(function(ps){
-    var b=document.getElementById('pnd-bdg');b.textContent=ps.length;b.style.display=ps.length>0?'inline':'none';
+    var b=document.getElementById('pnd-badge');b.textContent=ps.length;b.style.display=ps.length>0?'inline':'none';
     document.getElementById('pndl').innerHTML=ps.length===0
-      ?'<div class="empty"><span class="empty-ico">⏳</span>Tidak ada permintaan</div>'
-      :ps.map(function(p){return '<div class="pc"><div class="pav">'+av(p.name)+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+p.name+'</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">'+p.username+' | '+p.email+' | <span class="urole '+p.role+'">'+RM[p.role]+'</span></div></div><div style="display:flex;gap:8px"><button class="abtn s" onclick="approveU('+p.id+')">Setujui</button><button class="abtn d" onclick="rejectU('+p.id+',\''+p.name.replace(/'/g,"\\'")+'\')" >Tolak</button></div></div>';}).join('');
+      ?'<div class="empty-state"><span class="empty-icon">⏳</span>Tidak ada permintaan pendaftaran</div>'
+      :ps.map(function(p){
+        return '<div class="pending-card"><div class="pending-av">'+av(p.name)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:700">'+esc(p.name)+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px">'+esc(p.username)+' · '+esc(p.email)+' · <span class="tb-urole '+p.role+'">'+RM[p.role]+'</span></div></div><div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" onclick="approveU('+p.id+')" style="border-color:var(--gr);color:var(--gr)">✓ Setujui</button><button class="btn btn-secondary btn-sm" onclick="rejectU('+p.id+',\''+esc(p.name)+'\')" style="border-color:var(--rd);color:var(--rd)">✗ Tolak</button></div></div>';
+      }).join('');
   });
 }
 function ldActivity(){
   fetch('/api/users/activity').then(function(r){return r.json();}).then(function(acts){
     document.getElementById('actl').innerHTML=acts.length===0
-      ?'<div class="empty"><span class="empty-ico">📜</span>Belum ada aktivitas</div>'
-      :acts.map(function(a){return '<div class="al '+a.type+'"><div style="font-size:12px;font-weight:500">'+a.message+'</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">'+new Date(a.created_at).toLocaleString('id-ID')+'</div></div>';}).join('');
+      ?'<div class="empty-state"><span class="empty-icon">📜</span>Belum ada aktivitas</div>'
+      :acts.map(function(a){return '<div class="activity-item '+(a.type||'info')+'"><div style="font-size:13px;font-weight:500">'+esc(a.message)+'</div><div style="font-size:11px;color:var(--tx3);margin-top:3px">'+new Date(a.created_at).toLocaleString('id-ID')+'</div></div>';}).join('');
   });
 }
 function ldAllSubs(){
   fetch('/api/tasks/all/submissions').then(function(r){return r.json();}).then(function(subs){
-    if(subs.length===0){document.getElementById('sub-all').innerHTML='<div class="empty"><span class="empty-ico">📁</span>Belum ada pengumpulan</div>';return;}
+    if(subs.length===0){document.getElementById('sub-all').innerHTML='<div class="empty-state"><span class="empty-icon">📁</span>Belum ada pengumpulan</div>';return;}
     var grp={};
     subs.forEach(function(s){if(!grp[s.task_id])grp[s.task_id]={title:s.task_title,items:[]};grp[s.task_id].items.push(s);});
     document.getElementById('sub-all').innerHTML=Object.values(grp).map(function(g){
-      return '<div class="mbc" style="margin-bottom:16px"><div class="ct">'+g.title+'</div>'+g.items.map(renderSub).join('')+'</div>';
+      return '<div class="team-card" style="margin-bottom:16px"><div class="card-title">📋 '+esc(g.title)+' <span class="card-title-badge" style="background:var(--acg);color:var(--ac)">'+g.items.length+' submission</span></div><div class="sub-timeline">'+g.items.map(renderSub).join('')+'</div></div>';
     }).join('');
   });
 }
 function renderSub(s){
   var st=(s.status_change.split('->')[1]||s.status_change.split('\u2192')[1]||'done').trim();
-  var ico={inprogress:'🔄',review:'🔍',done:'✅',todo:'↩'}[st]||'📝';
-  return '<div class="sub-item"><div class="sub-icon '+st+'">'+ico+'</div><div class="sub-body"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:600">'+s.user_name+'</span><span style="font-size:10px;color:var(--tx3)">'+new Date(s.created_at).toLocaleString('id-ID')+'</span></div><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">'+s.status_change+'</div>'+(s.note?'<div style="font-size:12px;margin-bottom:4px">'+esc(s.note)+'</div>':'')+(s.file?'<a href="'+s.file+'" target="_blank" class="abtn" style="display:inline-flex;text-decoration:none">📎 Lihat File</a>':'')+'</div></div>';
+  var ico={inprogress:'⚡',review:'🔍',done:'✅',todo:'↩'}[st]||'📝';
+  return '<div class="sub-item"><div class="sub-icon '+(st||'todo')+'">'+ico+'</div><div class="sub-body"><div class="sub-hdr"><span class="sub-name">'+esc(s.user_name)+'</span><span class="sub-time">'+new Date(s.created_at).toLocaleString('id-ID')+'</span></div><div class="sub-change">'+esc(s.status_change)+'</div>'+(s.note?'<div class="sub-note">'+esc(s.note)+'</div>':'')+(s.file?'<a href="'+s.file+'" target="_blank" class="sub-file-link">📎 '+esc(s.file_name||'Lihat File')+'</a>':'')+'</div></div>';
 }
 
+// ═══════════════ CHARTS ═══════════════
 function rCharts(){
   var dk=document.documentElement.getAttribute('data-theme')==='dark';
-  var gc=dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)';
-  var tc=dk?'#a1a1aa':'#94a3b8';
+  var gc=dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)';
+  var tc=dk?'#9090a8':'#8a8aaa';
   var done=AT.filter(function(t){return t.status==='done';}).length;
   if(cW)cW.destroy();
   cW=new Chart(document.getElementById('cw'),{type:'bar',data:{
-    labels:['Mgu 1','Mgu 2','Mgu 3','Mgu 4','Bulan ini'],
-    datasets:[{label:'Selesai',data:[2,3,1,4,done],backgroundColor:'#14b8a6',borderRadius:6},
-              {label:'Baru',data:[3,2,4,2,Math.ceil(AT.length/5)],backgroundColor:'#3b82f6',borderRadius:6}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:10}}}},
-      scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc},beginAtZero:true}}}});
+    labels:['Mgu 1','Mgu 2','Mgu 3','Mgu 4','Saat ini'],
+    datasets:[{label:'Selesai',data:[2,3,1,4,done],backgroundColor:'rgba(34,197,94,0.8)',borderRadius:6,borderSkipped:false},
+              {label:'Ditambahkan',data:[3,2,4,2,Math.max(1,Math.ceil(AT.length/4))],backgroundColor:'rgba(91,143,249,0.5)',borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:11},boxWidth:12}}},
+      scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:11}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:11}},beginAtZero:true}}}});
   var sc={todo:0,inprogress:0,review:0,done:0};
   AT.forEach(function(t){if(sc[t.status]!==undefined)sc[t.status]++;});
   if(cP)cP.destroy();
   cP=new Chart(document.getElementById('cp'),{type:'doughnut',data:{
-    labels:['To Do','Progress','Review','Done'],
+    labels:['To Do','In Progress','Review','Done'],
     datasets:[{data:[sc.todo,sc.inprogress,sc.review,sc.done],
-      backgroundColor:['#71717a','#3b82f6','#f59e0b','#14b8a6'],borderWidth:0,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:10},boxWidth:10,padding:10}}}}});
+      backgroundColor:['rgba(144,144,168,0.7)','rgba(91,143,249,0.85)','rgba(245,158,11,0.85)','rgba(34,197,94,0.85)'],
+      borderWidth:0,hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{position:'bottom',labels:{color:tc,font:{size:11},boxWidth:12,padding:12}}}}});
 }
 function rMemberProg(){
   document.getElementById('mpr').innerHTML=AU.length===0
-    ?'<div class="empty"><span class="empty-ico">👥</span>Belum ada anggota</div>'
+    ?'<div class="empty-state"><span class="empty-icon">👥</span>Belum ada anggota tim</div>'
     :AU.map(function(u,i){
       var total=AT.filter(function(t){return t.assignee_id===u.id;}).length;
       var done=AT.filter(function(t){return t.assignee_id===u.id&&t.status==='done';}).length;
       var pct=total>0?Math.round(done/total*100):0;
-      var c=AC[i%AC.length];
-      return '<div class="mr"><div class="mav" style="background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+u.name+'</div><div style="font-size:10px;color:var(--tx3)">'+RM[u.role]+'</div></div><div style="width:140px"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span>'+done+'/'+total+'</span><span style="font-weight:600">'+pct+'%</span></div><div class="pb"><div class="pf" style="width:'+pct+'%;background:'+c+'"></div></div></div><div style="font-size:11px;font-weight:600;min-width:50px;text-align:right">'+AT.filter(function(t){return t.assignee_id===u.id&&t.status!=='done';}).length+' aktif</div></div>';
+      var c=color(i);
+      return '<div class="team-row"><div class="team-av" style="background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><div class="team-info"><div class="team-name">'+esc(u.name)+'</div><div class="team-role">'+RM[u.role]+'</div></div><div class="team-progress"><div class="team-pct"><span>'+done+'/'+total+'</span><span style="font-weight:700">'+pct+'%</span></div><div class="progress-bg"><div class="progress-fill" style="width:'+pct+'%;background:'+c+'"></div></div></div><div class="team-stat">'+AT.filter(function(t){return t.assignee_id===u.id&&t.status!=='done';}).length+' aktif</div></div>';
     }).join('');
 }
 function rDash(){rCharts();rMemberProg();}
 
+// ═══════════════ KANBAN ═══════════════
 function rKanban(){
-  var cols=[{id:'todo',label:'To Do',dot:'#71717a'},{id:'inprogress',label:'In Progress',dot:'#3b82f6'},{id:'review',label:'Review',dot:'#f59e0b'},{id:'done',label:'Done',dot:'#14b8a6'}];
+  var cols=[{id:'todo',label:'To Do',dot:'#9090a8'},{id:'inprogress',label:'In Progress',dot:'#5b8ff9'},{id:'review',label:'Review',dot:'#f59e0b'},{id:'done',label:'Done',dot:'#22c55e'}];
   var today=new Date();today.setHours(0,0,0,0);
   document.getElementById('kbb').innerHTML=cols.map(function(col){
     var ct=AT.filter(function(t){return t.status===col.id;});
@@ -914,23 +1164,25 @@ function rKanban(){
       var canUpd=isPIC||isMe||CU.role==='manager';
       var canView=isPIC||isMe||isMember||CU.role==='manager';
       var ns=NS[t.status];
-      var typeBadge=t.is_group?'<div class="tbadge grp">👥 '+esc(t.group_name||'Group')+'</div>':'<div class="tbadge ind">👤 Individu</div>';
-      var info=t.is_group?'<div class="tass">⭐ PIC: '+esc(t.pic_name||'-')+'</div>'+(t.member_names&&t.member_names.length?'<div class="tass">👥 '+esc(t.member_names.join(', '))+'</div>':''):(t.assignee_name?'<div class="tass">👤 '+esc(t.assignee_name)+'</div>':'');
+      var aidx=t.is_group?AU.findIndex(function(u){return u.id===t.pic_id;}):AU.findIndex(function(u){return u.id===t.assignee_id;});
+      var ac=color(aidx>=0?aidx:0);
+      var typeBadge=t.is_group?'<span class="task-type-badge grp">👥 '+esc(t.group_name||'Group')+'</span>':'<span class="task-type-badge ind">👤 Individu</span>';
+      var info=t.is_group?'<div class="task-assignee"><div class="task-assignee-av" style="background:'+ac+'22;color:'+ac+'">'+av(t.pic_name||'?')+'</div>⭐ PIC: '+esc(t.pic_name||'-')+'</div>'+(t.member_names&&t.member_names.length?'<div class="task-assignee" style="margin-top:-2px">👥 '+esc(t.member_names.join(', '))+'</div>':''):(t.assignee_name?'<div class="task-assignee"><div class="task-assignee-av" style="background:'+ac+'22;color:'+ac+'">'+av(t.assignee_name)+'</div>'+esc(t.assignee_name)+'</div>':'');
       var btns='';
-      if(canUpd&&ns)btns+='<button class="tbtn '+(ns==='done'?'go':ns==='review'?'rv':'pr')+'" onclick="openStatusM('+t.id+',\''+ns+'\',\''+esc(t.title)+'\')">'+NM[t.status]+'</button>';
-      if(canUpd&&t.status!=='todo')btns+='<button class="tbtn" onclick="openStatusM('+t.id+',\'todo\',\''+esc(t.title)+'\')">Reset</button>';
-      if(canView)btns+='<button class="tbtn" onclick="openDetail('+t.id+',\''+esc(t.title)+'\')">Detail</button>';
-      return '<div class="tcard" draggable="true" data-id="'+t.id+'" ondragstart="dStart(event)" ondragend="dEnd(event)">'+typeBadge+'<div class="ttl">'+esc(t.title)+'</div><div class="tmt"><span class="ptag '+t.priority+'">'+PM[t.priority]+'</span>'+(t.deadline?'<span class="tdl'+(ov?' ov':'')+'">📅 '+(ov?'Terlambat':t.deadline)+'</span>':'')+'</div>'+info+'<div class="tact">'+btns+'</div></div>';
+      if(canUpd&&ns)btns+='<button class="task-btn '+(ns==='done'?'go':ns==='review'?'rv':'pr')+'" onclick="openStatusM('+t.id+',\''+ns+'\',\''+esc(t.title)+'\')">'+NM[t.status]+'</button>';
+      if(canUpd&&t.status!=='todo')btns+='<button class="task-btn" onclick="openStatusM('+t.id+',\'todo\',\''+esc(t.title)+'\')">↩ Reset</button>';
+      if(canView)btns+='<button class="task-btn" onclick="openDetail('+t.id+',\''+esc(t.title)+'\')">Detail</button>';
+      return '<div class="task-card" draggable="true" data-id="'+t.id+'" ondragstart="dStart(event)" ondragend="dEnd(event)">'+typeBadge+'<div class="task-title">'+esc(t.title)+'</div><div class="task-tags"><span class="priority-pill '+t.priority+'">'+PM[t.priority]+'</span>'+(t.deadline?'<span class="deadline-tag'+(ov?' ov':'')+'">📅 '+(ov?'Terlambat':t.deadline)+'</span>':'')+'</div>'+info+'<div class="task-footer">'+btns+'</div></div>';
     }).join('');
-    return '<div class="kbc"><div class="kbch"><div class="col-title"><div class="col-dot" style="background:'+col.dot+'"></div>'+col.label+'</div><div class="col-cnt">'+ct.length+'</div></div>'+(ct.length===0?'<div style="padding:20px;text-align:center;font-size:12px;color:var(--tx3)">Kosong</div>':'')+cards+'<div class="dz" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="dropTask(event,\''+col.id+'\')">Letakkan di sini</div></div>';
+    return '<div class="kanban-col"><div class="kanban-col-hdr"><div class="col-dot-wrap"><div class="col-dot" style="background:'+col.dot+'"></div><span class="col-name">'+col.label+'</span></div><span class="col-badge">'+ct.length+'</span></div>'+(ct.length===0?'<div style="padding:20px;text-align:center;font-size:12px;color:var(--tx3)">Tidak ada tugas</div>':'')+cards+'<div class="dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="dropTask(event,\''+col.id+'\')">↓ Letakkan di sini</div></div>';
   }).join('');
 }
 
 function openStatusM(tid,status,title){
   document.getElementById('mst-tid').value=tid;
   document.getElementById('mst-status').value=status;
-  document.getElementById('mst-title').textContent='Update: '+title;
-  var desc={todo:'Kembalikan ke To Do',inprogress:'Tandai mulai dikerjakan',review:'Kirim untuk review',done:'Tandai selesai'};
+  document.getElementById('mst-title').textContent=(status==='done'?'✅':status==='review'?'🔍':'⚡')+' Update: '+title;
+  var desc={todo:'Kembalikan tugas ke To Do',inprogress:'Tandai tugas mulai dikerjakan',review:'Kirim untuk direview atasan',done:'Tandai tugas selesai!'};
   document.getElementById('mst-desc').textContent=desc[status]||'';
   document.getElementById('mst-note').value='';
   clearFile();openModal('m-status');
@@ -938,29 +1190,22 @@ function openStatusM(tid,status,title){
 function prevFile(inp){if(inp.files&&inp.files[0]){document.getElementById('up-name').textContent=inp.files[0].name;document.getElementById('up-prev').style.display='flex';}}
 function clearFile(){document.getElementById('mst-file').value='';document.getElementById('up-prev').style.display='none';}
 function submitStatus(){
-  var tid=document.getElementById('mst-tid').value;
-  var status=document.getElementById('mst-status').value;
-  var note=document.getElementById('mst-note').value;
-  var file=document.getElementById('mst-file').files[0];
+  var tid=document.getElementById('mst-tid').value,status=document.getElementById('mst-status').value;
+  var note=document.getElementById('mst-note').value,file=document.getElementById('mst-file').files[0];
   setSp('sp-status',true);
-  var fd=new FormData();
-  fd.append('status',status);
-  if(note)fd.append('note',note);
-  if(file)fd.append('file',file);
+  var fd=new FormData();fd.append('status',status);if(note)fd.append('note',note);if(file)fd.append('file',file);
   fetch('/api/tasks/'+tid+'/status',{method:'PATCH',body:fd})
   .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
   .then(function(res){
     if(!res.ok)throw new Error(res.data.error||'Gagal');
     closeModal('m-status');clearFile();
-    toast('Status diubah ke '+SM[status],'success');
-    loadAll();
-  }).catch(function(e){toast(e.message,'error');})
-  .finally(function(){setSp('sp-status',false);});
+    toast('Status diubah ke '+SM[status],'success');loadAll();
+  }).catch(function(e){toast(e.message,'error');}).finally(function(){setSp('sp-status',false);});
 }
 
 function openDetail(taskId,title){
-  document.getElementById('mdet-title').textContent='Detail: '+title;
-  document.getElementById('mdet-body').innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3)">Memuat...</div>';
+  document.getElementById('mdet-title').textContent='📋 '+title;
+  document.getElementById('mdet-body').innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3)">Memuat...</div>';
   openModal('m-detail');
   Promise.all([
     fetch('/api/tasks/'+taskId+'/submissions').then(function(r){return r.json();}),
@@ -974,18 +1219,21 @@ function openDetail(taskId,title){
     var ns=task?NS[task.status]:null;
     var items=all.map(function(item){
       if(item._t==='sub')return renderSub(item);
-      return '<div class="sub-item"><div class="sub-icon" style="background:var(--blg);border-color:var(--bl)">💬</div><div class="sub-body"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:600">'+item.user_name+'</span><span style="font-size:10px;color:var(--tx3)">'+new Date(item.created_at).toLocaleString('id-ID')+'</span></div><div style="font-size:13px">'+esc(item.comment)+'</div></div></div>';
+      var ui=AU.findIndex(function(u){return u.id===item.user_id;});
+      var uc=color(ui>=0?ui:0);
+      return '<div class="sub-item"><div class="sub-icon" style="background:'+uc+'22;border-color:'+uc+'">💬</div><div class="sub-body"><div class="sub-hdr"><span class="sub-name">'+esc(item.user_name)+'</span><span class="sub-time">'+new Date(item.created_at).toLocaleString('id-ID')+'</span></div><div class="sub-note">'+esc(item.comment)+'</div></div></div>';
     }).join('');
     document.getElementById('mdet-body').innerHTML=
-      (all.length===0?'<div class="empty"><span class="empty-ico">📭</span>Belum ada aktivitas</div>':items)+
-      '<div style="border-top:1px solid var(--bd);padding-top:16px;margin-top:16px">'+
-      '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+      '<div style="max-height:45vh;overflow-y:auto;margin-bottom:16px">'+(all.length===0?'<div class="empty-state"><span class="empty-icon">📭</span>Belum ada aktivitas</div>':items)+'</div>'+
+      '<div style="border-top:1px solid var(--bd);padding-top:14px">'+
+      '<div style="display:flex;gap:8px;margin-bottom:10px">'+
       '<textarea id="nc-'+taskId+'" placeholder="Tulis komentar..." style="flex:1;padding:10px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--rm);font-size:13px;color:var(--tx);font-family:Inter,sans-serif;outline:none;resize:none;height:70px"></textarea>'+
-      '<button onclick="postCom('+taskId+')" class="btn-p" style="align-self:flex-end;width:auto;padding:8px 16px">Kirim</button></div>'+
-      (canUpd&&ns?'<button onclick="closeModal(\'m-detail\');openStatusM('+taskId+',\''+ns+'\',\''+esc(title)+'\')" class="btn-p" style="width:100%;justify-content:center">Update Status ke '+SM[ns]+'</button>':'')+
+      '<button class="btn btn-primary" style="align-self:flex-end" onclick="postCom('+taskId+')">Kirim</button></div>'+
+      (canUpd&&ns?'<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="closeModal(\'m-detail\');openStatusM('+taskId+',\''+ns+'\',\''+esc(title)+'\')">⚡ Update Status → '+SM[ns]+'</button>':'')+
       '</div>';
-  }).catch(function(){document.getElementById('mdet-body').innerHTML='<div class="empty">Gagal memuat</div>';});
+  }).catch(function(){document.getElementById('mdet-body').innerHTML='<div class="empty-state">Gagal memuat</div>';});
 }
+
 function postCom(tid){
   var el=document.getElementById('nc-'+tid);
   var comment=el?el.value.trim():'';
@@ -996,7 +1244,7 @@ function postCom(tid){
 }
 
 function dStart(e){dragId=parseInt(e.currentTarget.dataset.id);e.currentTarget.classList.add('dragging');}
-function dEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.dz').forEach(function(z){z.classList.remove('over');});}
+function dEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.dropzone').forEach(function(z){z.classList.remove('over');});}
 function allowDrop(e){e.preventDefault();e.currentTarget.classList.add('over');}
 function dragLeave(e){e.currentTarget.classList.remove('over');}
 function dropTask(e,col){
@@ -1007,159 +1255,220 @@ function dropTask(e,col){
   dragId=null;
 }
 
+// ═══════════════ TABLE ═══════════════
 function renderTbl(){
   var q=document.getElementById('si').value.toLowerCase();
-  var fs=document.getElementById('fs').value;
-  var fp=document.getElementById('fp').value;
+  var fs=document.getElementById('fs').value,fp=document.getElementById('fp').value;
   var today=new Date().toISOString().split('T')[0];
   var f=AT.filter(function(t){return(!q||t.title.toLowerCase().includes(q))&&(!fs||t.status===fs)&&(!fp||t.priority===fp);});
   document.getElementById('ttb').innerHTML=f.length===0
-    ?'<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--tx3)">Tidak ada tugas</td></tr>'
+    ?'<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--tx3)">Tidak ada tugas ditemukan</td></tr>'
     :f.map(function(t){
       var ov=t.deadline&&t.deadline<today&&t.status!=='done';
       var ns=NS[t.status];
       var canUpd=t.assignee_id===CU.id||t.pic_id===CU.id||CU.role==='manager';
-      return '<tr><td style="font-weight:500">'+esc(t.title)+'</td><td>'+(t.is_group?'⭐ '+esc(t.pic_name||'-'):esc(t.assignee_name||'-'))+'</td><td>'+(t.is_group?'Group':'Individu')+'</td><td><span class="ptag '+t.priority+'">'+PM[t.priority]+'</span></td><td style="color:'+(ov?'var(--rd)':'inherit')+'">'+(t.deadline||'-')+'</td><td><span class="sbdg '+t.status+'">'+SM[t.status]+'</span></td><td><div style="display:flex;gap:6px">'+(canUpd&&ns?'<button class="abtn" onclick="openStatusM('+t.id+',\''+ns+'\',\''+esc(t.title)+'\')">'+SM[ns]+'</button>':'')+'<button class="abtn" onclick="openDetail('+t.id+',\''+esc(t.title)+'\')">Detail</button></div></td></tr>';
+      return '<tr><td style="font-weight:600">'+esc(t.title)+'</td><td>'+(t.is_group?'⭐ '+esc(t.pic_name||'-'):esc(t.assignee_name||'-'))+'</td><td>'+(t.is_group?'<span class="task-type-badge grp" style="display:inline-flex">Group</span>':'<span class="task-type-badge ind" style="display:inline-flex">Individu</span>')+'</td><td><span class="priority-pill '+t.priority+'">'+PM[t.priority]+'</span></td><td style="color:'+(ov?'var(--rd)':'inherit')+';font-weight:'+(ov?700:400)+'">'+( t.deadline||'—')+'</td><td><span class="status-chip '+t.status+'">'+SM[t.status]+'</span></td><td><div style="display:flex;gap:6px">'+(canUpd&&ns?'<button class="btn btn-secondary btn-xs" onclick="openStatusM('+t.id+',\''+ns+'\',\''+esc(t.title)+'\')">→ '+SM[ns]+'</button>':'')+'<button class="btn btn-ghost btn-xs" onclick="openDetail('+t.id+',\''+esc(t.title)+'\')">Detail</button></div></td></tr>';
     }).join('');
 }
 
+// ═══════════════ CALENDAR ═══════════════
 function rCal(){
   var months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
   document.getElementById('cml').textContent=months[cM]+' '+cY;
   var fd=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate(),td=new Date();
   var dlD=new Set(AT.filter(function(t){return t.deadline;}).map(function(t){var d=new Date(t.deadline);return d.getFullYear()===cY&&d.getMonth()===cM?d.getDate():null;}).filter(Boolean));
-  var h=['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map(function(l){return '<div class="cdh">'+l+'</div>';}).join('');
-  for(var i=0;i<(fd===0?6:fd-1);i++)h+='<div class="cd" style="opacity:0.3"></div>';
+  var h=['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map(function(l){return '<div class="cal-dh">'+l+'</div>';}).join('');
+  for(var i=0;i<(fd===0?6:fd-1);i++)h+='<div class="cal-d om"></div>';
   for(var d=1;d<=dim;d++){
     var it=d===td.getDate()&&cM===td.getMonth()&&cY===td.getFullYear();
-    h+='<div class="cd'+(it?' today':'')+(dlD.has(d)?' dl':'')+'">'+d+'</div>';
+    h+='<div class="cal-d'+(it?' today':'')+(dlD.has(d)?' dl':'')+'">'+d+'</div>';
   }
   document.getElementById('calg').innerHTML=h;
   var now=new Date();now.setHours(0,0,0,0);
   var in30=new Date(now);in30.setDate(in30.getDate()+30);
   var upc=AT.filter(function(t){return t.deadline&&t.status!=='done'&&new Date(t.deadline)>=now&&new Date(t.deadline)<=in30;}).sort(function(a,b){return new Date(a.deadline)-new Date(b.deadline);});
   document.getElementById('upc').innerHTML=upc.length===0
-    ?'<div class="empty"><span class="empty-ico">🗓️</span>Tidak ada deadline 30 hari ke depan</div>'
+    ?'<div class="empty-state"><span class="empty-icon">🗓️</span>Tidak ada deadline 30 hari ke depan</div>'
     :upc.map(function(t){
       var dl=new Date(t.deadline),diff=Math.ceil((dl-now)/864e5);
-      var uc=diff<=3?'var(--rd)':diff<=7?'var(--or)':'var(--tl)';
-      return '<div class="upc-item"><div class="upc-date"><div class="upc-day" style="color:'+uc+'">'+dl.getDate()+'</div><div class="upc-mon">'+months[dl.getMonth()].slice(0,3)+'</div></div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+esc(t.title)+'</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">'+(t.assignee_name||t.pic_name||'-')+'</div></div><div style="font-size:11px;font-weight:700;color:'+uc+'">'+(diff===0?'Hari ini':diff===1?'Besok':diff+' hr')+'</div></div>';
+      var uc=diff<=3?'var(--rd)':diff<=7?'var(--or)':'var(--gr)';
+      return '<div class="upc-item"><div class="upc-date-box"><div class="upc-day" style="color:'+uc+'">'+dl.getDate()+'</div><div class="upc-mon">'+months[dl.getMonth()].slice(0,3)+'</div></div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(t.title)+'</div><div style="font-size:11px;color:var(--tx3);margin-top:2px">'+(t.assignee_name||t.pic_name||'—')+'</div></div><span class="upc-diff" style="background:'+uc+'22;color:'+uc+'">'+(diff===0?'Hari ini':diff===1?'Besok':diff+' hr')+'</span></div>';
     }).join('');
 }
 function calP(){if(cM===0){cM=11;cY--;}else cM--;rCal();}
 function calN(){if(cM===11){cM=0;cY++;}else cM++;rCal();}
 
+// ═══════════════ CHAT ═══════════════
 function startChatPoll(){
   clearInterval(chatTimer);
   chatTimer=setInterval(function(){
     if(chatTarget!==null||chatMode==='group')refreshMsgs();
-    checkUnread();
-  },4000);
+    checkUnread();checkTyping();
+  },3000);
   checkUnread();
 }
+
 function checkUnread(){
   fetch('/api/chat/unread').then(function(r){return r.json();}).then(function(data){
-    var b=document.getElementById('chat-bdg');b.textContent=data.total;b.style.display=data.total>0?'inline':'none';
-    var mb=document.getElementById('mn-chat-bdg');if(mb){mb.textContent=data.total;mb.className='mn-bdg'+(data.total>0?' on':'');}
-    if(data.personal)Object.keys(data.personal).forEach(function(uid){var el=document.getElementById('ci-bdg-'+uid);if(el){el.textContent=data.personal[uid];el.className='ci-bdg'+(data.personal[uid]>0?' on':'');}});
-    var gel=document.getElementById('ci-bdg-group');if(gel){gel.textContent=data.group;gel.className='ci-bdg'+(data.group>0?' on':'');}
+    var b=document.getElementById('chat-nav-badge');b.textContent=data.total;b.style.display=data.total>0?'inline':'none';
+    var mb=document.getElementById('mn-chat-bdg');if(mb){mb.textContent=data.total;mb.className='mob-nav-badge'+(data.total>0?' on':'');}
+    if(data.personal)Object.keys(data.personal).forEach(function(uid){
+      var el=document.getElementById('cu-'+uid);
+      if(el){el.textContent=data.personal[uid];el.className='chat-unread-badge'+(data.personal[uid]>0?' on':'');}
+    });
+    var gel=document.getElementById('cu-group');
+    if(gel){gel.textContent=data.group;gel.className='chat-unread-badge'+(data.group>0?' on':'');}
   }).catch(function(){});
 }
+
+function checkTyping(){
+  fetch('/api/chat/typing').then(function(r){return r.json();}).then(function(typing){
+    var ti=document.getElementById('typing-indicator');
+    if(!ti)return;
+    var relevant=typing.filter(function(t){
+      if(chatMode==='group')return t.is_group;
+      return !t.is_group&&(t.user_id===chatTarget||t.to_user_id===CU.id);
+    });
+    if(relevant.length>0){
+      var names=relevant.map(function(t){return t.user_name.split(' ')[0];}).join(', ');
+      var tn=document.getElementById('typing-name');
+      if(tn)tn.textContent=names+' sedang mengetik...';
+      ti.classList.add('on');
+    } else {
+      ti.classList.remove('on');
+    }
+  }).catch(function(){});
+}
+
+function sendTyping(){
+  clearTimeout(typingTimer);
+  var body={is_group:chatMode==='group'};
+  if(chatMode==='personal'&&chatTarget)body.to_user_id=chatTarget;
+  fetch('/api/chat/typing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).catch(function(){});
+  typingTimer=setTimeout(function(){
+    fetch('/api/chat/typing',{method:'DELETE'}).catch(function(){});
+  },4000);
+}
+
 function switchCTab(mode,el){
   chatMode=mode;chatTarget=null;
   document.querySelectorAll('.ctab').forEach(function(t){t.classList.remove('on');});el.classList.add('on');
   loadChat();
-  document.getElementById('chat-main').innerHTML='<div class="chat-empty"><span style="font-size:48px">💬</span><span>Pilih percakapan</span></div>';
+  document.getElementById('chat-main').innerHTML='<div class="chat-empty-state"><span class="chat-empty-icon">💬</span><span style="font-size:14px;font-weight:600">Pilih percakapan</span><span style="font-size:12px">Mulai chat dengan tim kamu</span></div>';
 }
+
 function loadChat(){
   if(chatMode==='group'){
-    document.getElementById('clist').innerHTML='<div class="ci on" onclick="openGroupChat(this)"><div class="ci-av" style="background:var(--acg);color:var(--ac);font-size:18px">🌐</div><div class="ci-info"><div class="ci-name">Group Chat<span id="ci-bdg-group" class="ci-bdg">0</span></div><div class="ci-sub">Semua anggota tim</div></div></div>';
-    openGroupChat(document.querySelector('.ci'));
+    document.getElementById('clist').innerHTML='<div class="chat-contact on" id="cc-group" onclick="openGroupChat(this)"><div class="chat-contact-av" style="background:var(--acg);color:var(--ac);font-size:18px">🌐</div><div class="chat-contact-info"><div class="chat-contact-name">Group Chat<span id="cu-group" class="chat-unread-badge">0</span></div><div class="chat-contact-preview">Semua anggota tim</div></div></div>';
+    openGroupChat(document.getElementById('cc-group'));
   } else {
     fetch('/api/chat/users').then(function(r){return r.json();}).then(function(users){
       allContacts=users;renderContactList(users);
-    }).catch(function(){document.getElementById('clist').innerHTML='<div style="padding:14px;text-align:center;font-size:12px;color:var(--tx3)">Gagal memuat</div>';});
+    }).catch(function(){});
   }
 }
+
 function renderContactList(users){
   document.getElementById('clist').innerHTML=users.length===0
-    ?'<div style="padding:14px;text-align:center;font-size:12px;color:var(--tx3)">Tidak ada kontak</div>'
+    ?'<div style="padding:20px;text-align:center;font-size:12px;color:var(--tx3)">Tidak ada kontak</div>'
     :users.map(function(u,i){
-      var c=AC[i%AC.length];
-      return '<div class="ci" onclick="openPersonalChat('+u.id+',\''+u.name.replace(/'/g,"\\'")+'\',this)"><div class="ci-av" style="background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><div class="ci-info"><div class="ci-name">'+esc(u.name)+'<span id="ci-bdg-'+u.id+'" class="ci-bdg">0</span></div><div class="ci-sub">'+(RM[u.role]||'-')+'</div></div></div>';
+      var c=color(i);
+      return '<div class="chat-contact" id="cc-'+u.id+'" onclick="openPersonalChat('+u.id+',\''+esc(u.name)+'\',this)"><div class="chat-contact-av" style="background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><div class="chat-contact-info"><div class="chat-contact-name">'+esc(u.name)+'<span id="cu-'+u.id+'" class="chat-unread-badge">0</span></div><div class="chat-contact-preview">'+RM[u.role]+'</div></div></div>';
     }).join('');
   checkUnread();
 }
+
 function filterContacts(){
   var q=document.getElementById('csearch').value.toLowerCase();
   if(chatMode==='group')return;
   renderContactList(allContacts.filter(function(u){return u.name.toLowerCase().includes(q);}));
 }
+
 function openGroupChat(el){
   chatMode='group';chatTarget=null;
-  document.querySelectorAll('.ci').forEach(function(c){c.classList.remove('on');});
+  document.querySelectorAll('.chat-contact').forEach(function(c){c.classList.remove('on');});
   if(el)el.classList.add('on');
   fetch('/api/chat/read-group',{method:'PATCH'}).catch(function(){});
-  fetchMsgs().then(function(msgs){renderChatRight('Group Chat','Semua anggota tim',null,msgs);checkUnread();});
+  fetchMsgs().then(function(msgs){
+    renderChatUI('🌐 Group Chat','Semua anggota tim',null,msgs);checkUnread();
+  });
 }
+
 function openPersonalChat(uid,name,el){
   chatTarget=uid;
-  document.querySelectorAll('.ci').forEach(function(c){c.classList.remove('on');});
+  document.querySelectorAll('.chat-contact').forEach(function(c){c.classList.remove('on');});
   if(el)el.classList.add('on');
-  if(window.innerWidth<=768){var cl=document.getElementById('chat-left');if(cl)cl.classList.remove('show');}
+  if(window.innerWidth<=768){var cs=document.getElementById('chat-sidebar');if(cs)cs.classList.remove('show');}
   fetch('/api/chat/read/'+uid,{method:'PATCH'}).catch(function(){});
   fetchMsgs().then(function(msgs){
-    var idx=AU.findIndex(function(u){return u.id===uid;});
-    var c=AC[idx>=0?idx%AC.length:0];
-    renderChatRight(name,RM[AU.find(function(u){return u.id===uid;})||{}]['role']||'',{bg:c+'22',color:c},msgs);
+    var ui=AU.findIndex(function(u){return u.id===uid;});
+    var c=color(ui>=0?ui:0);
+    renderChatUI(name,RM[AU.find(function(u){return u.id===uid;})||{role:'karyawan'}]['role']||'',{bg:c+'22',color:c},msgs);
     checkUnread();
   });
 }
+
 function fetchMsgs(){
   var url=chatMode==='group'?'/api/chat/group':'/api/chat/personal/'+chatTarget;
   return fetch(url).then(function(r){return r.json();}).catch(function(){return[];});
 }
-function renderChatRight(name,sub,ci,msgs){
+
+function renderChatUI(name,sub,ci,msgs){
   var isMob=window.innerWidth<=768;
-  var avHtml=ci?'<div class="chat-hdr-av" style="background:'+ci.bg+';color:'+ci.color+'">'+av(name)+'</div>':'<div class="chat-hdr-av" style="background:var(--acg);color:var(--ac);font-size:16px">🌐</div>';
+  var avHtml=ci
+    ?'<div class="chat-main-av" style="background:'+ci.bg+';color:'+ci.color+'">'+av(name)+'</div>'
+    :'<div class="chat-main-av" style="background:var(--acg);color:var(--ac);font-size:16px">🌐</div>';
   document.getElementById('chat-main').innerHTML=
-    '<div class="chat-hdr">'+(isMob?'<button onclick="showChatList()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--tx2);margin-right:8px">&#8592;</button>':'')+avHtml+'<div><div class="chat-hdr-name">'+esc(name)+'</div>'+(sub?'<div style="font-size:11px;color:var(--tx3)">'+sub+'</div>':'')+'</div></div>'+
+    '<div class="chat-main-hdr">'+(isMob?'<button class="chat-main-back" onclick="showChatSidebar()">←</button>':'')+avHtml+
+    '<div><div class="chat-main-name">'+esc(name)+'</div>'+(sub?'<div class="chat-main-sub">'+esc(sub)+'</div>':'')+'</div></div>'+
     '<div class="chat-msgs" id="cmsgs">'+renderBubbles(msgs)+'</div>'+
-    '<div class="chat-inp-wrap"><textarea class="chat-inp" id="cinp" placeholder="Tulis pesan..." onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea><button class="chat-send" onclick="sendMsg()">&#8593;</button></div>';
+    '<div class="typing-indicator" id="typing-indicator"><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div><span class="typing-name" id="typing-name"></span></div>'+
+    '<div class="chat-input-area"><div class="chat-input-wrap"><textarea class="chat-inp" id="cinp" placeholder="Tulis pesan..." rows="1" oninput="sendTyping()" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea><button class="chat-send" onclick="sendMsg()">&#8593;</button></div></div>';
   scrollBot();
 }
-function showChatList(){var cl=document.getElementById('chat-left');if(cl)cl.classList.add('show');}
+
+function showChatSidebar(){var cs=document.getElementById('chat-sidebar');if(cs)cs.classList.add('show');}
+
 function renderBubbles(msgs){
-  if(!msgs||msgs.length===0)return'<div class="chat-empty"><span style="font-size:36px">💬</span><span style="font-size:12px">Mulai percakapan</span></div>';
+  if(!msgs||msgs.length===0)return'<div class="chat-empty-state"><span class="chat-empty-icon" style="font-size:36px">💬</span><span style="font-size:13px">Mulai percakapan</span></div>';
   var html='',lastDate='';
-  msgs.forEach(function(m){
+  msgs.forEach(function(m,idx){
     var d=new Date(m.created_at);
     var ds=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-    if(ds!==lastDate){html+='<div class="msg-date">'+ds+'</div>';lastDate=ds;}
+    if(ds!==lastDate){html+='<div class="chat-date-sep">'+ds+'</div>';lastDate=ds;}
     var isMe=m.from_id===CU.id;
+    var readBy=m.is_read_by||[m.from_id];
+    var isRead=readBy.filter(function(uid){return uid!==m.from_id;}).length>0;
+    var isLast=idx===msgs.length-1;
     html+='<div class="msg '+(isMe?'me':'you')+'">'
-      +(!isMe&&chatMode==='group'?'<div class="msg-sender">'+esc(m.from_name)+'</div>':'')
+      +(!isMe&&chatMode==='group'?'<div class="msg-sender-name">'+esc(m.from_name)+'</div>':'')
       +'<div class="msg-bubble">'+esc(m.message)+'</div>'
-      +'<div class="msg-time">'+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+'</div></div>';
+      +'<div class="msg-meta"><span class="msg-time">'+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+'</span>'
+      +(isMe&&isLast?'<span class="msg-read'+(isRead?'':' unread')+'">'+(isRead?'✓✓':'✓')+'</span>':'')+'</div></div>';
   });
   return html;
 }
+
 function scrollBot(){var el=document.getElementById('cmsgs');if(el)el.scrollTop=el.scrollHeight;}
+
 function sendMsg(){
   var inp=document.getElementById('cinp');if(!inp)return;
   var msg=inp.value.trim();if(!msg)return;
   var body={message:msg};
   if(chatMode==='personal'&&chatTarget)body.to_user_id=chatTarget;
+  fetch('/api/chat/typing',{method:'DELETE'}).catch(function(){});
   fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-  .then(function(){inp.value='';refreshMsgs();})
+  .then(function(){inp.value='';inp.style.height='auto';refreshMsgs();})
   .catch(function(){toast('Gagal kirim pesan','error');});
 }
+
 function refreshMsgs(){
   var el=document.getElementById('cmsgs');if(!el)return;
-  var bot=el.scrollHeight-el.clientHeight<=el.scrollTop+40;
+  var bot=el.scrollHeight-el.clientHeight<=el.scrollTop+50;
   fetchMsgs().then(function(msgs){el.innerHTML=renderBubbles(msgs);if(bot)scrollBot();});
 }
 
+// ═══════════════ TASK TYPE ═══════════════
 function switchTipe(tipe){
   curTipe=tipe;
   var ti=document.getElementById('tipe-ind'),tg=document.getElementById('tipe-grp');
@@ -1175,41 +1484,50 @@ function switchTipe(tipe){
     renderMP();
   }
 }
+
 function renderMP(){
   var nm=AU.filter(function(u){return u.role!=='manager';});
   var pic=document.getElementById('fpic');
-  pic.innerHTML=nm.map(function(u){return '<option value="'+u.id+'">'+u.name+' - '+RM[u.role]+'</option>';}).join('');
+  pic.innerHTML=nm.map(function(u){return '<option value="'+u.id+'">'+u.name+' — '+RM[u.role]+'</option>';}).join('');
   var picVal=parseInt(pic.value);
   var avail=nm.filter(function(u){return !selMembers.has(u.id);});
   var sel=nm.filter(function(u){return selMembers.has(u.id);});
+  document.getElementById('avail-cnt').textContent='('+avail.length+')';
   document.getElementById('mp-avail').innerHTML=avail.length===0
-    ?'<div style="padding:10px;text-align:center;font-size:11px;color:var(--tx3)">Semua dipilih</div>'
-    :avail.map(function(u,i){var c=AC[i%AC.length];return '<div onclick="addMember('+u.id+')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bd)" onmouseover="this.style.background=\'var(--bg3)\'" onmouseout="this.style.background=\'transparent\'"><div style="width:24px;height:24px;border-radius:50%;background:'+c+'22;color:'+c+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">'+av(u.name)+'</div><div style="flex:1;font-size:12px">'+esc(u.name)+'</div><div style="color:var(--tl);font-size:16px">+</div></div>';}).join('');
-  document.getElementById('mp-sel').innerHTML=sel.length===0
-    ?'<div style="padding:10px;text-align:center;font-size:11px;color:var(--tx3)">Belum ada</div>'
-    :sel.map(function(u,i){var c=AC[i%AC.length];var isPIC=picVal===u.id;return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--acg);border-bottom:1px solid var(--bd)"><div style="width:24px;height:24px;border-radius:50%;background:'+c+'22;color:'+c+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">'+av(u.name)+'</div><div style="flex:1;font-size:12px">'+esc(u.name)+(isPIC?' (PIC)':'')+'</div><div onclick="removeMember('+u.id+')" style="color:var(--rd);cursor:pointer;font-size:14px">X</div></div>';}).join('');
+    ?'<div style="padding:12px;text-align:center;font-size:11px;color:var(--tx3)">Semua sudah dipilih</div>'
+    :avail.map(function(u,i){
+      var c=color(i);
+      return '<div class="member-row" onclick="addMember('+u.id+')"><div class="member-row-av" style="background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><div class="member-row-name">'+esc(u.name)+'</div><span class="member-row-action">+</span></div>';
+    }).join('');
   document.getElementById('mp-cnt').textContent='('+sel.length+')';
+  document.getElementById('mp-sel').innerHTML=sel.length===0
+    ?'<div style="padding:12px;text-align:center;font-size:11px;color:var(--tx3)">Belum ada anggota</div>'
+    :sel.map(function(u,i){
+      var c=color(i);var isPIC=picVal===u.id;
+      return '<div class="member-row selected"><div class="member-row-av" style="background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><div class="member-row-name">'+esc(u.name)+(isPIC?' ⭐':'')+'</div><span class="member-row-action remove" onclick="removeMember('+u.id+')">✕</span></div>';
+    }).join('');
 }
 function addMember(uid){selMembers.add(uid);renderMP();}
 function removeMember(uid){selMembers.delete(uid);renderMP();}
 
+// ═══════════════ USERS ═══════════════
 function rUsers(){
   if(CU.role!=='manager')return;
   document.getElementById('utb').innerHTML=AU.map(function(u,i){
-    var c=AC[i%AC.length];
-    return '<tr><td><div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><span style="font-weight:500">'+esc(u.name)+'</span></div></td><td>'+esc(u.username)+'</td><td>'+esc(u.email)+'</td><td><span class="urole '+u.role+'">'+RM[u.role]+'</span></td><td><div style="display:flex;gap:6px">'+(u.id!==CU.id?'<button class="abtn" onclick="openReset('+u.id+')">Reset</button><button class="abtn d" onclick="delUser('+u.id+',\''+u.name.replace(/'/g,"\\'")+'\')">Hapus</button>':'<span style="color:var(--tx3);font-size:11px">Kamu</span>')+'</div></td></tr>';
+    var c=color(i);
+    return '<tr><td><div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:'+c+'22;color:'+c+'">'+av(u.name)+'</div><span style="font-weight:600">'+esc(u.name)+'</span></div></td><td>'+esc(u.username)+'</td><td>'+esc(u.email)+'</td><td><span class="tb-urole '+u.role+'">'+RM[u.role]+'</span></td><td style="color:var(--tx3)">'+new Date(u.created_at).toLocaleDateString('id-ID')+'</td><td><div style="display:flex;gap:6px">'+(u.id!==CU.id?'<button class="btn btn-ghost btn-xs" onclick="openReset('+u.id+')">🔑 Reset</button><button class="btn btn-ghost btn-xs" style="color:var(--rd)" onclick="delUser('+u.id+',\''+esc(u.name)+'\')">🗑</button>':'<span style="color:var(--tx3);font-size:11px">Akun kamu</span>')+'</div></td></tr>';
   }).join('');
 }
 
+// ═══════════════ NAVIGATION ═══════════════
 function showSec(name,el){
-  if(MANAGER_PAGES.indexOf(name)!==-1&&CU&&CU.role!=='manager'){
-    toast('Akses ditolak - Hanya untuk Manager','error');return;
-  }
+  if(MANAGER_PAGES.indexOf(name)!==-1&&CU&&CU.role!=='manager'){toast('Akses ditolak — Hanya untuk Manager','error');return;}
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});
-  document.querySelectorAll('.si').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(i){i.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('on');
   if(el)el.classList.add('active');
-  if(name==='notif'){fetch('/api/notifications/read',{method:'PATCH'});document.getElementById('notif-bdg').style.display='none';}
+  var bc=document.getElementById('bc-current');if(bc)bc.textContent=PAGE_NAMES[name]||name;
+  if(name==='notif'){fetch('/api/notifications/read',{method:'PATCH'});document.getElementById('notif-badge').style.display='none';document.getElementById('tb-notif-badge').className='tb-notif-badge';}
   if(name==='activity')ldActivity();
   if(name==='pending')ldPending();
   if(name==='calendar')rCal();
@@ -1222,14 +1540,13 @@ function showSec(name,el){
 }
 
 function mobileNav(name,el){
-  if(MANAGER_PAGES.indexOf(name)!==-1&&CU&&CU.role!=='manager'){
-    toast('Akses ditolak','error');return;
-  }
+  if(MANAGER_PAGES.indexOf(name)!==-1&&CU&&CU.role!=='manager'){toast('Akses ditolak','error');return;}
   showSec(name,null);
-  document.querySelectorAll('.mn-item').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.mob-nav-item').forEach(function(i){i.classList.remove('active');});
   if(el)el.classList.add('active');
 }
 
+// ═══════════════ MODALS & SHEETS ═══════════════
 function openModal(id){document.getElementById(id).classList.add('on');}
 function closeModal(id){document.getElementById(id).classList.remove('on');}
 function openBS(id){document.getElementById(id).classList.add('on');}
@@ -1237,27 +1554,27 @@ function closeBS(id){document.getElementById(id).classList.remove('on');}
 function openReset(uid){document.getElementById('rid').value=uid;document.getElementById('rpass').value='';document.getElementById('rerr').style.display='none';openModal('m-reset');}
 document.querySelectorAll('.ovl').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('on');});});
 
+// ═══════════════ ACTIONS ═══════════════
 function approveU(id){
   if(CU.role!=='manager'){toast('Akses ditolak','error');return;}
-  fetch('/api/auth/pending/'+id+'/approve',{method:'POST'}).then(function(){loadAll();toast('Disetujui!','success');}).catch(function(){toast('Gagal','error');});
+  fetch('/api/auth/pending/'+id+'/approve',{method:'POST'}).then(function(){loadAll();toast('User disetujui!','success');}).catch(function(){toast('Gagal','error');});
 }
 function rejectU(id,name){
   if(CU.role!=='manager'){toast('Akses ditolak','error');return;}
-  if(!confirm('Tolak "'+name+'"?'))return;
+  if(!confirm('Tolak pendaftaran "'+name+'"?'))return;
   fetch('/api/auth/pending/'+id+'/reject',{method:'POST'}).then(function(){loadAll();toast('Ditolak','info');}).catch(function(){toast('Gagal','error');});
 }
 function saveTask(){
   if(CU.role!=='manager'){toast('Hanya Manager yang bisa tambah tugas','error');return;}
   var title=document.getElementById('ft').value.trim();
-  if(!title){toast('Judul wajib!','error');return;}
+  if(!title){toast('Judul wajib diisi!','error');return;}
   setSp('sp-task',true);
   var p;
   if(curTipe==='individu'){
     p=fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       title:title,description:document.getElementById('fd').value,
       assignee_id:document.getElementById('fa').value,
-      priority:document.getElementById('fpr').value,
-      deadline:document.getElementById('fdl').value})});
+      priority:document.getElementById('fpr').value,deadline:document.getElementById('fdl').value})});
   } else {
     var members=Array.from(selMembers);
     if(members.length===0){toast('Pilih minimal 1 anggota!','error');setSp('sp-task',false);return;}
@@ -1273,9 +1590,8 @@ function saveTask(){
     closeModal('m-task');
     document.getElementById('ft').value='';document.getElementById('fd').value='';
     selMembers=new Set();switchTipe('individu');
-    loadAll();toast('Tugas ditambahkan!','success');
-  }).catch(function(e){toast(e.message,'error');})
-  .finally(function(){setSp('sp-task',false);});
+    loadAll();toast('Tugas berhasil ditambahkan!','success');
+  }).catch(function(e){toast(e.message,'error');}).finally(function(){setSp('sp-task',false);});
 }
 function saveUser(){
   if(CU.role!=='manager'){toast('Akses ditolak','error');return;}
@@ -1288,16 +1604,14 @@ function saveUser(){
   .then(function(res){
     if(!res.ok)throw new Error(res.data.error);
     closeModal('m-adduser');['aun','auu','aue','aup'].forEach(function(id){document.getElementById(id).value='';});
-    loadAll();toast('User ditambahkan!','success');
-  }).catch(function(e){err.style.display='block';err.textContent=e.message;})
-  .finally(function(){setSp('sp-user',false);});
+    loadAll();toast('User berhasil ditambahkan!','success');
+  }).catch(function(e){err.style.display='block';err.textContent=e.message;}).finally(function(){setSp('sp-user',false);});
 }
 function delUser(id,name){
   if(CU.role!=='manager'){toast('Akses ditolak','error');return;}
-  if(!confirm('Hapus "'+name+'"?'))return;
-  fetch('/api/users/'+id,{method:'DELETE'})
-  .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
-  .then(function(res){if(!res.ok)throw new Error(res.data.error);loadAll();toast('Dihapus','info');})
+  if(!confirm('Hapus user "'+name+'"? Tindakan ini tidak bisa dibatalkan.'))return;
+  fetch('/api/users/'+id,{method:'DELETE'}).then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+  .then(function(res){if(!res.ok)throw new Error(res.data.error);loadAll();toast('User dihapus','info');})
   .catch(function(e){toast(e.message,'error');});
 }
 function doReset(){
@@ -1317,47 +1631,12 @@ function doChpass(){
   .then(function(res){
     if(!res.ok)throw new Error(res.data.error);
     closeModal('m-chpass');document.getElementById('cpold').value='';document.getElementById('cpnew').value='';
-    toast('Password diubah!','success');
-  }).catch(function(e){err.style.display='block';err.textContent=e.message;})
-  .finally(function(){setSp('sp-cp',false);});
+    toast('Password berhasil diubah!','success');
+  }).catch(function(e){err.style.display='block';err.textContent=e.message;}).finally(function(){setSp('sp-cp',false);});
 }
 
-var MANAGER_PAGES=['submissions','pending','users','activity'];
-function showForgotPassword(){
-  document.getElementById('forgot-email').value='';
-  document.getElementById('forgot-msg').style.display='none';
-  document.getElementById('forgot-step1').style.display='block';
-  document.getElementById('forgot-step2').style.display='none';
-  openModal('m-forgot');
-}
-
-function submitForgot(){
-  var email=document.getElementById('forgot-email').value.trim();
-  var msg=document.getElementById('forgot-msg');
-  msg.style.display='none';
-  if(!email){msg.style.display='block';msg.className='msgb err';msg.textContent='Email wajib diisi';return;}
-  document.getElementById('forgot-btn-text').style.display='none';
-  setSp('forgot-spn',true);
-  fetch('/api/auth/forgot-password',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:email})
-  }).then(function(r){return r.json();}).then(function(data){
-    if(data.success){
-      document.getElementById('forgot-step1').style.display='none';
-      document.getElementById('forgot-step2').style.display='block';
-    } else {
-      msg.style.display='block';msg.className='msgb err';msg.textContent=data.error||'Gagal';
-    }
-  }).catch(function(){
-    msg.style.display='block';msg.className='msgb err';msg.textContent='Gagal terhubung ke server';
-  }).finally(function(){
-    document.getElementById('forgot-btn-text').style.display='inline';
-    setSp('forgot-spn',false);
-  });
-}
-
-fetch('/api/auth/me').then(function(r){return r.json();}).then(function(d){if(d&&d.id){CU=d;showApp();}}).catch(function(){});
+// ═══════════════ SESSION CHECK ═══════════════
+fetch('/api/auth/me').then(function(r){return r.json();}).then(function(d){if(d&&d.id){CU=d;initApp();}}).catch(function(){});
 </script>
 </body>
 </html>
