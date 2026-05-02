@@ -1395,16 +1395,21 @@ function openGroupChat(el){
 }
 
 function openPersonalChat(uid,name,el){
+  chatMode='personal';
   chatTarget=uid;
   document.querySelectorAll('.chat-contact').forEach(function(c){c.classList.remove('on');});
   if(el)el.classList.add('on');
   if(window.innerWidth<=768){var cs=document.getElementById('chat-sidebar');if(cs)cs.classList.remove('show');}
   fetch('/api/chat/read/'+uid,{method:'PATCH'}).catch(function(){});
+  var userObj=AU.find(function(u){return u.id===uid;});
+  var ui=AU.findIndex(function(u){return u.id===uid;});
+  var c=color(ui>=0?ui:0);
+  var roleLabel=userObj?RM[userObj.role]:'';
   fetchMsgs().then(function(msgs){
-    var ui=AU.findIndex(function(u){return u.id===uid;});
-    var c=color(ui>=0?ui:0);
-    renderChatUI(name,RM[AU.find(function(u){return u.id===uid;})||{role:'karyawan'}]['role']||'',{bg:c+'22',color:c},msgs);
+    renderChatUI(name,roleLabel,{bg:c+'22',color:c},msgs);
     checkUnread();
+  }).catch(function(){
+    renderChatUI(name,roleLabel,{bg:c+'22',color:c},[]);
   });
 }
 
