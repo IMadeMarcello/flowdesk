@@ -91,7 +91,7 @@ r.post('/forgot-password',(req,res)=>{
   d.reset_tokens.push({user_id:user.id,token,expires});
   db.save(d);
   // Kirim email
-  const BASE_URL=process.env.BASE_URL||`http://localhost:${process.env.PORT||3000}`;
+  const cfg=require('../config');const BASE_URL=process.env.BASE_URL||cfg.base_url||`http://localhost:${process.env.PORT||3000}`;
   const resetLink=`${BASE_URL}/reset-password?token=${token}`;
   sendMail(user.email,'[FlowDesk] Reset Password',
     `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
