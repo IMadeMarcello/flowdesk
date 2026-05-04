@@ -853,21 +853,74 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);font-si
   </div>
 </div>
 
-<!-- MODAL: LUPA PASSWORD -->
+<!-- MODAL: LUPA PASSWORD (OTP) -->
 <div class="ovl" id="m-forgot">
   <div class="modal">
     <div class="modal-title">🔑 Lupa Password</div>
+    <!-- STEP 1: INPUT EMAIL -->
     <div id="forgot-s1">
-      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Masukkan email terdaftar. Link reset password akan dikirim ke email kamu.</p>
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:8px">📧</div>
+        <div style="font-size:13px;color:var(--tx2)">Masukkan email yang terdaftar. Kode OTP 6 digit akan dikirim ke email kamu.</div>
+      </div>
       <div class="ig"><label>Email</label><input type="email" id="forgot-email" placeholder="email@domain.com" onkeydown="if(event.key==='Enter')submitForgot()"></div>
       <div class="msgb err" id="forgot-msg"></div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('m-forgot')">Batal</button><button class="btn btn-primary" onclick="submitForgot()"><span id="forgot-btn">Kirim Link Reset</span><span class="spn" id="forgot-spn" style="display:none"></span></button></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('m-forgot')">Batal</button>
+        <button class="btn btn-primary" onclick="submitForgot()"><span id="forgot-btn">Kirim Kode OTP</span><span class="spn" id="forgot-spn" style="display:none"></span></button>
+      </div>
     </div>
-    <div id="forgot-s2" style="display:none;text-align:center;padding:10px 0">
-      <div style="font-size:52px;margin-bottom:16px">📧</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Link Terkirim!</div>
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Cek inbox atau folder spam email kamu. Link berlaku <b>1 jam</b>.</div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="closeModal('m-forgot');resetForgotForm()">Tutup</button>
+    <!-- STEP 2: INPUT OTP -->
+    <div id="forgot-s2" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:8px">🔢</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px">Masukkan Kode OTP</div>
+        <div style="font-size:12px;color:var(--tx2)">Kode 6 digit telah dikirim ke <b id="forgot-email-show"></b><br>Berlaku selama <b>10 menit</b></div>
+      </div>
+      <div class="ig">
+        <label>Kode OTP</label>
+        <input type="text" id="forgot-otp" placeholder="000000" maxlength="6"
+          style="text-align:center;font-size:28px;font-weight:900;letter-spacing:10px;font-family:monospace"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+          onkeydown="if(event.key==='Enter')verifyOTP()">
+      </div>
+      <div class="msgb err" id="otp-msg"></div>
+      <div style="text-align:center;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--tx3)">Tidak dapat kode? </span>
+        <span onclick="backToEmail()" style="font-size:12px;color:var(--ac);cursor:pointer;font-weight:600">Kirim ulang</span>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="backToEmail()">← Kembali</button>
+        <button class="btn btn-primary" onclick="verifyOTP()"><span id="otp-btn">Verifikasi OTP</span><span class="spn" id="otp-spn" style="display:none"></span></button>
+      </div>
+    </div>
+    <!-- STEP 3: INPUT PASSWORD BARU -->
+    <div id="forgot-s3" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:8px">🔐</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px">Buat Password Baru</div>
+        <div style="font-size:12px;color:var(--tx2)">OTP terverifikasi! Masukkan password baru kamu.</div>
+      </div>
+      <div class="ig">
+        <label>Password Baru</label>
+        <input type="password" id="forgot-newpass" placeholder="Minimal 6 karakter" onkeydown="if(event.key==='Enter')submitNewPass()">
+      </div>
+      <div class="ig">
+        <label>Konfirmasi Password</label>
+        <input type="password" id="forgot-confpass" placeholder="Ulangi password baru" onkeydown="if(event.key==='Enter')submitNewPass()">
+      </div>
+      <div class="msgb err" id="newpass-msg"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('m-forgot');resetForgotForm()">Batal</button>
+        <button class="btn btn-primary" onclick="submitNewPass()"><span id="newpass-btn">Simpan Password</span><span class="spn" id="newpass-spn" style="display:none"></span></button>
+      </div>
+    </div>
+    <!-- STEP 4: SUKSES -->
+    <div id="forgot-s4" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:52px;margin-bottom:16px">✅</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Password Berhasil Direset!</div>
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:20px">Silakan login dengan password baru kamu.</div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="closeModal('m-forgot');resetForgotForm()">Login Sekarang</button>
     </div>
   </div>
 </div>
@@ -979,24 +1032,71 @@ function doLogout(){
   document.getElementById('auth-page').style.display='flex';
 }
 
-function showForgot(){openModal('m-forgot');}
+var forgotEmail='';var forgotSessionToken='';
+function showForgot(){resetForgotForm();openModal('m-forgot');}
 function resetForgotForm(){
-  document.getElementById('forgot-s1').style.display='block';
-  document.getElementById('forgot-s2').style.display='none';
-  document.getElementById('forgot-email').value='';
-  document.getElementById('forgot-msg').style.display='none';
+  ['forgot-s1','forgot-s2','forgot-s3','forgot-s4'].forEach(function(id,i){
+    document.getElementById(id).style.display=i===0?'block':'none';
+  });
+  ['forgot-email','forgot-otp','forgot-newpass','forgot-confpass'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  ['forgot-msg','otp-msg','newpass-msg'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  forgotEmail='';forgotSessionToken='';
 }
+function showForgotStep(n){
+  ['forgot-s1','forgot-s2','forgot-s3','forgot-s4'].forEach(function(id,i){
+    document.getElementById(id).style.display=i===n-1?'block':'none';
+  });
+}
+function backToEmail(){showForgotStep(1);}
 function submitForgot(){
   var email=document.getElementById('forgot-email').value.trim();
   var msg=document.getElementById('forgot-msg');msg.style.display='none';
   if(!email){msg.style.display='block';msg.textContent='Email wajib diisi';return;}
+  forgotEmail=email;
   document.getElementById('forgot-btn').style.display='none';setSp('forgot-spn',true);
   fetch('/api/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})})
   .then(function(r){return r.json();}).then(function(d){
-    if(d.success){document.getElementById('forgot-s1').style.display='none';document.getElementById('forgot-s2').style.display='block';}
-    else{msg.style.display='block';msg.textContent=d.error||'Gagal';}
-  }).catch(function(){msg.style.display='block';msg.textContent='Gagal terhubung';})
+    if(d.success){
+      var es=document.getElementById('forgot-email-show');
+      if(es)es.textContent=email;
+      showForgotStep(2);
+      setTimeout(function(){var oi=document.getElementById('forgot-otp');if(oi)oi.focus();},200);
+    } else {msg.style.display='block';msg.textContent=d.error||'Gagal';}
+  }).catch(function(){msg.style.display='block';msg.textContent='Gagal terhubung ke server';})
   .finally(function(){document.getElementById('forgot-btn').style.display='inline';setSp('forgot-spn',false);});
+}
+function verifyOTP(){
+  var otp=document.getElementById('forgot-otp').value.trim();
+  var msg=document.getElementById('otp-msg');msg.style.display='none';
+  if(!otp||otp.length!==6){msg.style.display='block';msg.textContent='Masukkan kode OTP 6 digit';return;}
+  document.getElementById('otp-btn').style.display='none';setSp('otp-spn',true);
+  fetch('/api/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:forgotEmail,otp:otp})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.success){
+      forgotSessionToken=d.session_token;
+      showForgotStep(3);
+      setTimeout(function(){var np=document.getElementById('forgot-newpass');if(np)np.focus();},200);
+    } else {msg.style.display='block';msg.textContent=d.error||'OTP salah';}
+  }).catch(function(){msg.style.display='block';msg.textContent='Gagal terhubung ke server';})
+  .finally(function(){document.getElementById('otp-btn').style.display='inline';setSp('otp-spn',false);});
+}
+function submitNewPass(){
+  var pass=document.getElementById('forgot-newpass').value;
+  var conf=document.getElementById('forgot-confpass').value;
+  var msg=document.getElementById('newpass-msg');msg.style.display='none';
+  if(!pass||pass.length<6){msg.style.display='block';msg.textContent='Password minimal 6 karakter';return;}
+  if(pass!==conf){msg.style.display='block';msg.textContent='Password tidak cocok';return;}
+  document.getElementById('newpass-btn').style.display='none';setSp('newpass-spn',true);
+  fetch('/api/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_token:forgotSessionToken,new_password:pass})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.success){showForgotStep(4);}
+    else{msg.style.display='block';msg.textContent=d.error||'Gagal reset password';}
+  }).catch(function(){msg.style.display='block';msg.textContent='Gagal terhubung ke server';})
+  .finally(function(){document.getElementById('newpass-btn').style.display='inline';setSp('newpass-spn',false);});
 }
 
 // ═══════════════ APP INIT ═══════════════

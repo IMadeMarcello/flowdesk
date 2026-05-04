@@ -15,10 +15,7 @@ r.post('/login',(req,res)=>{
   res.json({success:true,user:req.session.user});
 });
 
-r.post('/logout',(req,res)=>{
-  req.session.destroy();
-  res.json({success:true});
-});
+r.post('/logout',(req,res)=>{req.session.destroy();res.json({success:true});});
 
 r.get('/me',(req,res)=>{
   if(!req.session.user)return res.status(401).json({error:'Belum login'});
@@ -60,84 +57,75 @@ r.patch('/change-password',requireLogin,(req,res)=>{
   res.json({success:true});
 });
 
-r.patch('/update-profile',requireLogin,(req,res)=>{
-  const{name}=req.body;
-  if(!name||!name.trim())return res.status(400).json({error:'Nama tidak boleh kosong'});
-  const d=db.get();
-  const idx=d.users.findIndex(u=>u.id===req.session.user.id);
-  if(idx===-1)return res.status(404).json({error:'User tidak ditemukan'});
-  d.users[idx].name=name.trim();
-  db.save(d);
-  req.session.user.name=name.trim();
-  res.json({success:true,name:name.trim()});
-});
-
-// FORGOT PASSWORD - kirim link reset
+// KIRIM OTP
 r.post('/forgot-password',(req,res)=>{
   const{email}=req.body;
   if(!email)return res.status(400).json({error:'Email wajib diisi'});
   const d=db.get();
   const user=d.users.find(u=>u.email===email.trim().toLowerCase());
-  // Selalu jawab sukses agar tidak bocorkan info email terdaftar
-  if(!user){
-    return res.json({success:true,message:'Jika email terdaftar, link reset akan dikirim.'});
-  }
-  // Buat token
-  const token=crypto.randomBytes(32).toString('hex');
-  const expires=Date.now()+(60*60*1000); // 1 jam
+  if(!user)return res.json({success:true,message:'Jika email terdaftar, kode OTP akan dikirim.'});
+  // Buat OTP 6 digit
+  const otp=Math.floor(100000+Math.random()*900000).toString();
+  const expires=Date.now()+(10*60*1000); // 10 menit
   if(!d.reset_tokens)d.reset_tokens=[];
-  // Hapus token lama untuk user ini
+  // Hapus OTP lama
   d.reset_tokens=d.reset_tokens.filter(t=>t.user_id!==user.id);
-  d.reset_tokens.push({user_id:user.id,token,expires});
+  d.reset_tokens.push({user_id:user.id,otp,expires,email:user.email});
   db.save(d);
-  // Kirim email
-  const cfg=require('../config');const BASE_URL=process.env.BASE_URL||cfg.base_url||`http://localhost:${process.env.PORT||3000}`;
-  const resetLink=`${BASE_URL}/reset-password?token=${token}`;
-  sendMail(user.email,'[FlowDesk] Reset Password',
-    `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
-      <h2 style="color:#10b981">Reset Password FlowDesk</h2>
-      <p>Halo <b>${user.name}</b>,</p>
-      <p>Kami menerima permintaan reset password untuk akun kamu.</p>
-      <p>Klik tombol di bawah untuk reset password:</p>
-      <div style="text-align:center;margin:30px 0">
-        <a href="${resetLink}" style="background:#10b981;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">Reset Password</a>
+  // Kirim email OTP
+  sendMail(user.email,'[FlowDesk] Kode OTP Reset Password',`
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:20px">
+      <div style="text-align:center;margin-bottom:24px">
+        <h2 style="color:#5b8ff9;font-size:24px;margin:0">🗂 FlowDesk</h2>
+        <p style="color:#888;margin-top:4px">Reset Password</p>
       </div>
-      <p style="color:#888;font-size:12px">Link ini berlaku selama <b>1 jam</b>. Abaikan email ini jika kamu tidak meminta reset password.</p>
-      <p style="color:#888;font-size:12px">Atau copy link berikut:<br><a href="${resetLink}">${resetLink}</a></p>
-    </div>`
-  );
-  res.json({success:true,message:'Jika email terdaftar, link reset akan dikirim.'});
+      <div style="background:#f8fafc;border-radius:12px;padding:24px;text-align:center">
+        <p style="color:#333;margin-bottom:16px">Halo <b>${user.name}</b>, berikut kode OTP untuk reset password kamu:</p>
+        <div style="background:white;border:2px dashed #5b8ff9;border-radius:12px;padding:24px;margin:16px 0">
+          <div style="font-size:42px;font-weight:900;letter-spacing:12px;color:#5b8ff9;font-family:monospace">${otp}</div>
+        </div>
+        <p style="color:#888;font-size:13px">Kode ini berlaku selama <b>10 menit</b></p>
+        <p style="color:#ef4444;font-size:12px;margin-top:8px">Jangan berikan kode ini kepada siapapun!</p>
+      </div>
+      <p style="color:#aaa;font-size:11px;text-align:center;margin-top:16px">Jika kamu tidak meminta reset password, abaikan email ini.</p>
+    </div>
+  `);
+  res.json({success:true,message:'Kode OTP telah dikirim ke email kamu.'});
 });
 
-// Validasi token reset
-r.get('/reset-password',(req,res)=>{
-  const{token}=req.query;
-  if(!token)return res.status(400).json({error:'Token tidak valid'});
+// VERIFIKASI OTP
+r.post('/verify-otp',(req,res)=>{
+  const{email,otp}=req.body;
+  if(!email||!otp)return res.status(400).json({error:'Email dan OTP wajib diisi'});
   const d=db.get();
-  if(!d.reset_tokens)return res.status(400).json({error:'Token tidak valid atau sudah expired'});
-  const tokenData=d.reset_tokens.find(t=>t.token===token);
-  if(!tokenData)return res.status(400).json({error:'Token tidak valid atau sudah expired'});
-  if(Date.now()>tokenData.expires)return res.status(400).json({error:'Token sudah expired. Silakan minta reset password baru.'});
-  res.json({success:true,valid:true});
+  if(!d.reset_tokens)return res.status(400).json({error:'OTP tidak valid'});
+  const tokenData=d.reset_tokens.find(t=>t.email===email.trim().toLowerCase()&&t.otp===otp.trim());
+  if(!tokenData)return res.status(400).json({error:'Kode OTP salah'});
+  if(Date.now()>tokenData.expires)return res.status(400).json({error:'Kode OTP sudah kadaluarsa. Minta kode baru.'});
+  // Buat session token untuk submit password baru
+  const session_token=crypto.randomBytes(16).toString('hex');
+  tokenData.session_token=session_token;
+  tokenData.otp_verified=true;
+  db.save(d);
+  res.json({success:true,session_token});
 });
 
-// Submit password baru
+// RESET PASSWORD DENGAN SESSION TOKEN
 r.post('/reset-password',(req,res)=>{
-  const{token,new_password}=req.body;
-  if(!token||!new_password)return res.status(400).json({error:'Data tidak lengkap'});
+  const{session_token,new_password}=req.body;
+  if(!session_token||!new_password)return res.status(400).json({error:'Data tidak lengkap'});
   if(new_password.length<6)return res.status(400).json({error:'Password minimal 6 karakter'});
   const d=db.get();
-  if(!d.reset_tokens)return res.status(400).json({error:'Token tidak valid'});
-  const tokenData=d.reset_tokens.find(t=>t.token===token);
-  if(!tokenData)return res.status(400).json({error:'Token tidak valid atau sudah expired'});
-  if(Date.now()>tokenData.expires)return res.status(400).json({error:'Token sudah expired. Silakan minta reset password baru.'});
+  if(!d.reset_tokens)return res.status(400).json({error:'Sesi tidak valid'});
+  const tokenData=d.reset_tokens.find(t=>t.session_token===session_token&&t.otp_verified);
+  if(!tokenData)return res.status(400).json({error:'Sesi tidak valid atau sudah kadaluarsa'});
+  if(Date.now()>tokenData.expires)return res.status(400).json({error:'Sesi kadaluarsa. Silakan mulai ulang.'});
   const idx=d.users.findIndex(u=>u.id===tokenData.user_id);
   if(idx===-1)return res.status(404).json({error:'User tidak ditemukan'});
   d.users[idx].password=bcrypt.hashSync(new_password,10);
-  // Hapus token setelah dipakai
-  d.reset_tokens=d.reset_tokens.filter(t=>t.token!==token);
+  d.reset_tokens=d.reset_tokens.filter(t=>t.session_token!==session_token);
   db.save(d);
-  res.json({success:true,message:'Password berhasil direset! Silakan login.'});
+  res.json({success:true,message:'Password berhasil direset!'});
 });
 
 r.post('/pending/:id/approve',requireRole('manager'),(req,res)=>{
@@ -148,7 +136,7 @@ r.post('/pending/:id/approve',requireRole('manager'),(req,res)=>{
   d.users.push({id:uid,name:p.name,username:p.username,email:p.email,password:p.password,role:p.role,created_at:new Date().toISOString()});
   d.pending=d.pending.filter(x=>x.id!==pid);
   db.save(d);
-  sendMail(p.email,'[FlowDesk] Akun Disetujui',`<p>Halo ${p.name}, akun kamu telah disetujui. Username: ${p.username}</p>`);
+  sendMail(p.email,'[FlowDesk] Akun Disetujui',`<p>Halo ${p.name}, akun kamu telah disetujui! Username: <b>${p.username}</b></p>`);
   res.json({success:true});
 });
 
